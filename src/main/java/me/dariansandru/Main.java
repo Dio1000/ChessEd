@@ -1,6 +1,7 @@
 package me.dariansandru;
 
 import me.dariansandru.controller.ChessController;
+import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
 import me.dariansandru.domain.*;
@@ -13,7 +14,7 @@ import java.util.Objects;
 
 public class Main {
 
-    public static void main(String[] args) throws InputException, OutputException {
+    public static void main(String[] args) throws InputException, OutputException, ValidatorException {
         Player p1 = new Player();
         Player p2 = new Player();
         InputDevice inputDevice = new InputDevice();
@@ -44,4 +45,4 @@ public class Main {
 //TODO Fix ambiguous moves
 //TODO Add en passant and castling
 //TODO make validators separate classes
-//TODO Create Virtualiser
+//TODO When validating checkmate, movePiece actually move King if valid, making the last representation of the board wrong

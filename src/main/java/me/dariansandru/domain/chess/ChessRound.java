@@ -5,10 +5,13 @@ import me.dariansandru.domain.Player;
 import me.dariansandru.domain.validator.Validator;
 import me.dariansandru.domain.chess.piece.*;
 import me.dariansandru.io.exception.InputException;
-import me.dariansandru.utilities.Utilities;
+import me.dariansandru.utilities.ChessUtils;
 
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+
+import static me.dariansandru.utilities.ChessUtils.getLetter;
 
 public class ChessRound {
 
@@ -98,8 +101,8 @@ public class ChessRound {
     }
 
     public boolean movePiece(String move, PieceColour pieceColour) throws ValidatorException, InputException {
-        int col = Utilities.getColRow(move).getValue1();
-        int row = Utilities.getColRow(move).getValue2();
+        int col = ChessUtils.getColRow(move).getValue1();
+        int row = ChessUtils.getColRow(move).getValue2();
 
         String piece;
         if (Validator.validMovePieceNotation(move.charAt(0))){
@@ -115,7 +118,7 @@ public class ChessRound {
                         && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
                         && Validator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
                     pieces[currentRow][currentCol] = new EmptyPiece();
-                    pieces[row][col] = Utilities.getPiece(piece, pieceColour);
+                    pieces[row][col] = ChessUtils.getPiece(piece, pieceColour);
                     return true;
                 }
             }
@@ -123,8 +126,97 @@ public class ChessRound {
         return false;
     }
 
-    public boolean isCheckmate(){
+    //TODO Don't like this idea, will refactor later
+    public boolean checkMovePiece(String move, PieceColour pieceColour) throws ValidatorException, InputException {
+        int col = ChessUtils.getColRow(move).getValue1();
+        int row = ChessUtils.getColRow(move).getValue2();
+
+        String piece;
+        if (Validator.validMovePieceNotation(move.charAt(0))){
+            if ('a' <= move.charAt(0) && move.charAt(0) <= 'h') piece = "P";
+            else piece = String.valueOf(move.charAt(0));
+        }
+        else piece = "P";
+
+        for (int currentRow = 0 ; currentRow < 8 ; currentRow++){
+            for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
+                if (Objects.equals(pieces[currentRow][currentCol].getRepresentation(), piece)
+                        && pieces[currentRow][currentCol].getColour() == pieceColour
+                        && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
+                        && Validator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
+                    return true;
+                }
+            }
+        }
         return false;
+    }
+
+    private boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException, InputException {
+        PieceColour oppositeColour = (pieceColour == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
+
+        for (int row = 0 ; row < 8 ; row++){
+            for (int col = 0 ; col < 8 ; col++){
+                if (!Objects.equals(pieces[row][col].getName(), "None")){
+                    String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + kingRow;
+                    if (checkMovePiece(move, oppositeColour)) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public Set<String> getKingValidMoves(ChessRound chessRound, PieceColour pieceColour) throws ValidatorException, InputException {
+        int kingRow = -1;
+        int kingCol = -1;
+
+        Piece[][] pieces = chessRound.getPieces();
+
+        for (int row = 0 ; row < 8 ; row++){
+            for (int col = 0 ; col < 8 ; col++){
+                if (Objects.equals(pieces[row][col].getName(), "King")
+                    && pieces[row][col].getColour() == pieceColour){
+                    kingRow = row;
+                    kingCol = col;
+
+                }
+            }
+        }
+
+        Set<String> validKingMoves = new HashSet<>();
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                int newRow = kingRow + j + 1;
+                int newCol = kingCol + i;
+
+                if (newCol < 0 || newRow < 0 || newCol > 7 || newRow > 7) continue;
+
+                String move = "K" + ChessUtils.getLetter(newCol) + (newRow + 1);
+
+                if (checkMovePiece(move, pieceColour)) validKingMoves.add(move);
+            }
+        }
+
+        return validKingMoves;
+    }
+
+    public boolean isCheckmate(PieceColour pieceColour) throws ValidatorException, InputException {
+        Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
+        if (kingValidMoves.isEmpty()) return false;
+
+        for (String move : kingValidMoves){
+            int row = ChessUtils.getColRow(move).getValue2();
+            int col = ChessUtils.getColRow(move).getValue1();
+
+            if (!isKingChecked(row, col, pieceColour)) return false;
+        }
+
+        return true;
+    }
+
+    public boolean isCheckmate() throws ValidatorException, InputException {
+        return isCheckmate(PieceColour.WHITE) || isCheckmate(PieceColour.BLACK);
     }
 
     public boolean isStalemate(){

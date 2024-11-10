@@ -1,5 +1,6 @@
 package me.dariansandru.ui;
 
+import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
 import me.dariansandru.io.exception.InputException;
@@ -10,5 +11,5 @@ public interface ConsoleUI {
 
     InputDevice getInputDevice();
 
-    void show() throws InputException, OutputException;
+    void show() throws InputException, OutputException, ValidatorException;
 }

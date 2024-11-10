@@ -1,15 +1,15 @@
-WHITE.Pawn: 😶‍🌫
-WHITE.Rook: 🥶
-WHITE.Knight: 🦄
-WHITE.Bishop: 👺
-WHITE.Queen: 😻
-WHITE.King: 😼
+WHITE.Pawn:
+WHITE.Rook:
+WHITE.Knight:
+WHITE.Bishop:
+WHITE.Queen:
+WHITE.King:
 
-BLACK.Pawn: 🧑‍
-BLACK.Rook: 🧜‍
-BLACK.Knight: 🐴
-BLACK.Bishop: 🤪
-BLACK.Queen: 👩🏻‍🎤
-BLACK.King: 🦹🏽
+BLACK.Pawn:
+BLACK.Rook:
+BLACK.Knight:
+BLACK.Bishop:
+BLACK.Queen:
+BLACK.King:
 
-EmptyPiece: 🅿️
+EmptyPiece:

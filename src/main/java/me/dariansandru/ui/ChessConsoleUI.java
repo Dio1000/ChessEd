@@ -1,13 +1,13 @@
 package me.dariansandru.ui;
 
 import me.dariansandru.controller.ChessController;
-import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
 import me.dariansandru.io.exception.InputException;
 import me.dariansandru.io.exception.OutputException;
-import me.dariansandru.utilities.Utilities;
+import me.dariansandru.utilities.ChessUtils;
 
 import java.util.List;
 
@@ -34,12 +34,12 @@ public class ChessConsoleUI implements ConsoleUI{
     }
 
     @Override
-    public void show() throws InputException, OutputException {
+    public void show() throws InputException, OutputException, ValidatorException {
         String writeFile = "files/chessCurrentGame.txt";
-
+        int turn;
         //outputDevice.emptyFile(writeFile);
-        while (!chessController.isGameFinished()){
-            int turn = chessController.getTurnCount();
+        do{
+            turn = chessController.getTurnCount();
 
             if (turn % 2 == 0) {
                 displayBoard();
@@ -59,7 +59,17 @@ public class ChessConsoleUI implements ConsoleUI{
                 chessController.addTurn(move);
                 outputDevice.writeToFile(chessController.getTurns(), writeFile);
             }
+        }while(!chessController.isGameFinished());
+
+        if (turn % 2 == 0){
+            displayBoard();
+            outputDevice.writeLine(chessController.getWhitePiecesPlayer().getUsername() + " won by checkmate!");
         }
+        else {
+            displayRotatedBoard();
+            outputDevice.writeLine(chessController.getBlackPiecesPlayer().getUsername() + " won by checkmate!");
+        }
+
         displayMoves();
         outputDevice.emptyFile(writeFile);
     }
@@ -87,7 +97,7 @@ public class ChessConsoleUI implements ConsoleUI{
 
     public void displayBoard(){
         outputDevice.writeLine(chessController.getBlackPiecesPlayer().getUsername() + " " +
-                Utilities.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.BLACK));
+                ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.BLACK));
 
         for (int row = 7 ; row >= 0 ; row--){
             for (int col = 0 ; col < 8 ; col++){
@@ -97,12 +107,12 @@ public class ChessConsoleUI implements ConsoleUI{
         }
 
         outputDevice.writeLine(chessController.getWhitePiecesPlayer().getUsername() + " " +
-                Utilities.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.WHITE));
+                ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.WHITE));
     }
 
     public void displayRotatedBoard() {
         outputDevice.writeLine(chessController.getWhitePiecesPlayer().getUsername() + " " +
-                Utilities.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.WHITE));
+                ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.WHITE));
 
         for (int row = 7; row >= 0; row--) {
             for (int col = 0; col < 8; col++) {
@@ -112,6 +122,6 @@ public class ChessConsoleUI implements ConsoleUI{
         }
 
         outputDevice.writeLine(chessController.getBlackPiecesPlayer().getUsername() + " " +
-                Utilities.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.BLACK));
+                ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.BLACK));
     }
 }

@@ -4,7 +4,7 @@ import me.dariansandru.domain.chess.ChessRound;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.io.exception.InputException;
-import me.dariansandru.utilities.Utilities;
+import me.dariansandru.utilities.ChessUtils;
 
 import java.util.Objects;
 
@@ -38,8 +38,8 @@ public class Pawn implements Piece {
     public boolean isLegalMove(ChessRound chessRound, int currentRow, int currentCol, String move){
         Piece[][] pieces = chessRound.getPieces();
 
-        int newRow = Utilities.getColRow(move).getValue2();
-        int newCol = Utilities.getColRow(move).getValue1();
+        int newRow = ChessUtils.getColRow(move).getValue2();
+        int newCol = ChessUtils.getColRow(move).getValue1();
 
         // Case 0 - Illegal stay move
         if (currentRow == newRow && currentCol == newCol) return false;
@@ -52,9 +52,9 @@ public class Pawn implements Piece {
                 if (currentCol == newCol) return newRow <= 3;
                 // Case 1.2 - Takes another piece
                 if (currentCol + 1 == newCol)
-                    return Utilities.isValidPiece(pieces[currentRow - 1][currentCol + 1].getRepresentation());
+                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation());
                 else if (currentCol - 1 == newCol)
-                    return Utilities.isValidPiece(pieces[currentRow - 1][currentCol - 1].getRepresentation());
+                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
                 else return false;
             }
 
@@ -64,8 +64,8 @@ public class Pawn implements Piece {
 
             // Case 2.2 - Takes another piece
             if (currentRow + 1 == newRow){
-                if (currentCol + 1 == newCol && Utilities.isValidPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation())) return true;
-                else return currentCol - 1 == newCol && Utilities.isValidPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
+                if (currentCol + 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation())) return true;
+                else return currentCol - 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
             }
         }
 
@@ -77,9 +77,9 @@ public class Pawn implements Piece {
                 if (currentCol == newCol) return newRow >= 4;
                 // Case 1.2 - Takes another piece
                 if (currentCol + 1 == newCol)
-                    return Utilities.isValidPiece(pieces[currentRow][currentCol + 1].getRepresentation());
+                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol + 1].getRepresentation());
                 else if (currentCol - 1 == newCol)
-                    return Utilities.isValidPiece(pieces[currentRow][currentCol + 1].getRepresentation());
+                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol - 1].getRepresentation());
                 else return false;
             }
 
@@ -89,8 +89,8 @@ public class Pawn implements Piece {
 
             // Case 2.2 - Takes another piece
             if (currentRow - 1 == newRow){
-                if (currentCol + 1 == newCol && Utilities.isValidPiece(pieces[currentRow][currentCol + 1].getRepresentation())) return true;
-                else return currentCol - 1 == newCol && Utilities.isValidPiece(pieces[currentRow][currentCol + 1].getRepresentation());
+                if (currentCol + 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol + 1].getRepresentation())) return true;
+                else return currentCol - 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol - 1].getRepresentation());
             }
         }
         
@@ -104,10 +104,10 @@ public class Pawn implements Piece {
 
     @Override
     public void setDisplay() throws InputException {
-        String display = Utilities.getPieceDisplay(this.getName(), this.getColour());
+        String display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
 
         if (display.isEmpty() || Objects.equals(display, "Error")) return;
-        this.display = Utilities.getPieceDisplay(this.getName(), this.getColour());
+        this.display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
     }
 
     @Override

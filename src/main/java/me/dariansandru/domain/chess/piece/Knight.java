@@ -4,7 +4,7 @@ import me.dariansandru.domain.chess.ChessRound;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.io.exception.InputException;
-import me.dariansandru.utilities.Utilities;
+import me.dariansandru.utilities.ChessUtils;
 
 import java.util.Objects;
 
@@ -38,8 +38,8 @@ public class Knight implements Piece {
     public boolean isLegalMove(ChessRound chessRound, int currentRow, int currentCol, String move) {
         Piece[][] pieces = chessRound.getPieces();
 
-        int newRow = Utilities.getColRow(move).getValue2();
-        int newCol = Utilities.getColRow(move).getValue1();
+        int newRow = ChessUtils.getColRow(move).getValue2();
+        int newCol = ChessUtils.getColRow(move).getValue1();
 
         // Case 0 - Illegal stay move / Illegal friend position
         if (currentRow == newRow && currentCol == newCol) return false;
@@ -82,10 +82,10 @@ public class Knight implements Piece {
 
     @Override
     public void setDisplay() throws InputException {
-        String display = Utilities.getPieceDisplay(this.getName(), this.getColour());
+        String display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
 
         if (display.isEmpty() || Objects.equals(display, "Error")) return;
-        this.display = Utilities.getPieceDisplay(this.getName(), this.getColour());
+        this.display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
     }
 
     @Override

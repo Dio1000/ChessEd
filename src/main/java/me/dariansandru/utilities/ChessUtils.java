@@ -1,6 +1,5 @@
 package me.dariansandru.utilities;
 
-import me.dariansandru.controller.ChessController;
 import me.dariansandru.domain.Player;
 import me.dariansandru.domain.chess.ChessRound;
 import me.dariansandru.domain.chess.Piece;
@@ -13,7 +12,7 @@ import me.dariansandru.io.exception.InputException;
 import java.io.File;
 import java.util.*;
 
-public abstract class Utilities {
+public abstract class ChessUtils {
 
     public static InputDevice inputDevice = new InputDevice();
     public static OutputDevice outputDevice = new OutputDevice();
@@ -22,8 +21,12 @@ public abstract class Utilities {
         return chr - 'a';
     }
 
+    public static String getLetter(int num){
+        return String.valueOf((char) ('a' + num));
+    }
+
     public static boolean isValidPiece(char piece){
-        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'K', 'Q', 'R', 'B', 'N', ' '};
+        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'P', 'K', 'Q', 'R', 'B', 'N', ' '};
 
         for (char p : validPieces){
             if (Objects.equals(p, piece)) {
@@ -34,7 +37,19 @@ public abstract class Utilities {
     }
 
     public static boolean isValidPiece(String piece){
-        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'K', 'Q', 'R', 'B', 'N', ' '};
+        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'P', 'K', 'Q', 'R', 'B', 'N', ' '};
+        char _piece = piece.charAt(0);
+
+        for (char p : validPieces){
+            if (Objects.equals(p, _piece)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isValidNonEmptyPiece(String piece){
+        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'K', 'Q', 'R', 'B', 'N'};
         char _piece = piece.charAt(0);
 
         for (char p : validPieces){
@@ -202,4 +217,5 @@ public abstract class Utilities {
             throw new IllegalArgumentException(colour.toString() + " is not a valid colour!");
         }
     }
+
 }

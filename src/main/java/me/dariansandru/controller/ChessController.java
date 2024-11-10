@@ -3,6 +3,7 @@ package me.dariansandru.controller;
 import me.dariansandru.domain.Player;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.OutputDevice;
 import me.dariansandru.domain.chess.ChessRound;
 import me.dariansandru.io.exception.InputException;
@@ -69,7 +70,7 @@ public class ChessController implements GameController {
         turns.add(move);
     }
 
-    public boolean isGameFinished(){
+    public boolean isGameFinished() throws ValidatorException, InputException {
         return chessRound.isCheckmate() || chessRound.isStalemate();
     }
 

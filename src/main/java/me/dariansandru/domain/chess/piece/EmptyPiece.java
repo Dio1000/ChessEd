@@ -4,7 +4,7 @@ import me.dariansandru.domain.chess.ChessRound;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.io.exception.InputException;
-import me.dariansandru.utilities.Utilities;
+import me.dariansandru.utilities.ChessUtils;
 
 import java.util.Objects;
 
@@ -46,10 +46,10 @@ public class EmptyPiece implements Piece {
 
     @Override
     public void setDisplay() throws InputException {
-        String display = Utilities.getPieceDisplay(this.getName(), this.getColour());
+        String display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
 
         if (display.isEmpty() || Objects.equals(display, "Error")) return;
-        this.display = Utilities.getPieceDisplay(this.getName(), this.getColour());
+        this.display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
     }
 
     @Override

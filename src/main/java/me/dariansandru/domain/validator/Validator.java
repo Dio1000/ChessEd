@@ -1,16 +1,15 @@
 package me.dariansandru.domain.validator;
 
 import me.dariansandru.domain.validator.exception.ValidatorException;
-import me.dariansandru.io.OutputDevice;
 import me.dariansandru.domain.chess.ChessRound;
 import me.dariansandru.domain.chess.Piece;
-import me.dariansandru.utilities.Utilities;
+import me.dariansandru.utilities.ChessUtils;
 
 import java.util.Objects;
 
 public class Validator {
     public static boolean validMovePieceNotation(char piece) throws ValidatorException {
-        if (!Utilities.isValidPiece(piece)){
+        if (!ChessUtils.isValidPiece(piece)){
             throw new ValidatorException("Piece can only be K, Q, R, B or N!");
         }
         return true;
