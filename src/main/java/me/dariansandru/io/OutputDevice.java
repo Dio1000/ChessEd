@@ -46,6 +46,35 @@ public class OutputDevice {
         }
     }
 
+    public void appendToFile(List<String> list, String fileName) throws OutputException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            for (String line : list) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            throw new OutputException("Could not write to file.");
+        }
+    }
+
+    public void writeToFile(String line, String fileName) throws OutputException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write(line);
+            writer.newLine();
+        } catch (IOException e) {
+            throw new OutputException("Could not write to file.");
+        }
+    }
+
+    public void appendToFile(String line, String fileName) throws OutputException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(line);
+            writer.newLine();
+        } catch (IOException e) {
+            throw new OutputException("Could not write to file.");
+        }
+    }
+
     public void emptyFile(String fileName) throws OutputException {
         try{
             File file = new File(fileName);

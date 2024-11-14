@@ -15,10 +15,27 @@ import java.util.Objects;
 public class Main {
 
     public static void main(String[] args) throws InputException, OutputException, ValidatorException {
-        Player p1 = new Player();
-        Player p2 = new Player();
         InputDevice inputDevice = new InputDevice();
         OutputDevice outputDevice = new OutputDevice();
+
+        int argLength = args.length;
+        if (argLength == 0){
+            throw new InputException("No arguments were provided.");
+        }
+
+        if (Objects.equals(args[0], "play") && argLength < 3){
+            throw new InputException("Too few arguments were provided.");
+        }
+        else if (Objects.equals(args[0], "play") && argLength > 3){
+            throw new InputException("Too many arguments were provided.");
+        }
+
+        if (Objects.equals(args[0], "resume") && argLength > 1){
+            throw new InputException("Too many arguments were provided.");
+        }
+
+        Player p1 = new Player();
+        Player p2 = new Player();
 
         switch (args[0].toLowerCase()) {
             case "play" -> {
@@ -30,6 +47,14 @@ public class Main {
                 chessConsoleUI.show();
             }
             case "resume" -> {
+                String readFile = "files/chessCurrentGame.txt";
+                if (inputDevice.isFileEmpty(readFile)){
+                    throw new InputException("There is no current game.");
+                }
+
+                p1.setUsername(inputDevice.readLine(readFile, 1));
+                p2.setUsername(inputDevice.readLine(readFile, 2));
+
                 ChessController chessController = new ChessController(p1, p2);
                 ChessConsoleUI chessConsoleUI = new ChessConsoleUI(inputDevice, outputDevice, chessController);
 
@@ -44,5 +69,4 @@ public class Main {
 
 //TODO Fix ambiguous moves
 //TODO Add en passant and castling
-//TODO make validators separate classes
-//TODO When validating checkmate, movePiece actually move King if valid, making the last representation of the board wrong
+//TODO make GameRound an interface

@@ -82,4 +82,36 @@ public class InputDevice {
 
         return lineList;
     }
+
+    public String readLine(String file, int lineNumber) throws InputException {
+        try{
+            File myFile = new File(file);
+            Scanner reader = new Scanner(myFile);
+
+            String data = reader.nextLine();
+            int rowCount = 1;
+
+            while (data != null){
+                if (rowCount == lineNumber) return data;
+
+                rowCount++;
+                data = reader.nextLine();
+            }
+
+            reader.close();
+            return null;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isFileEmpty(String filePath) throws InputException {
+        File file = new File(filePath);
+
+        if (!file.exists() || !file.isFile()) {
+            throw new InputException("File does not exist: " + filePath);
+        }
+
+        return file.length() == 0;
+    }
 }

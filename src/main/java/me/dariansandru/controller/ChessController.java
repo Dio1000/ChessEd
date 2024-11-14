@@ -4,8 +4,7 @@ import me.dariansandru.domain.Player;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.domain.validator.exception.ValidatorException;
-import me.dariansandru.io.OutputDevice;
-import me.dariansandru.domain.chess.ChessRound;
+import me.dariansandru.round.ChessRound;
 import me.dariansandru.io.exception.InputException;
 
 import java.util.ArrayList;
@@ -33,6 +32,10 @@ public class ChessController implements GameController {
 
     public List<String> getTurns(){
         return this.turns;
+    }
+
+    public String getLastTurn(){
+        return this.turns.get(turn - 1);
     }
 
     public Piece getPiece(int row, int col){

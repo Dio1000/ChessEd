@@ -36,8 +36,13 @@ public class ChessConsoleUI implements ConsoleUI{
     @Override
     public void show() throws InputException, OutputException, ValidatorException {
         String writeFile = "files/chessCurrentGame.txt";
+        if (inputDevice.isFileEmpty(writeFile)) {
+            outputDevice.appendToFile(chessController.getWhitePiecesPlayer().getUsername(), writeFile);
+            outputDevice.appendToFile(chessController.getBlackPiecesPlayer().getUsername(), writeFile);
+        }
+        else outputDevice.emptyFile(writeFile);
+
         int turn;
-        //outputDevice.emptyFile(writeFile);
         do{
             turn = chessController.getTurnCount();
 
@@ -57,7 +62,7 @@ public class ChessConsoleUI implements ConsoleUI{
             }
             else{
                 chessController.addTurn(move);
-                outputDevice.writeToFile(chessController.getTurns(), writeFile);
+                outputDevice.appendToFile(chessController.getLastTurn(), writeFile);
             }
         }while(!chessController.isGameFinished());
 

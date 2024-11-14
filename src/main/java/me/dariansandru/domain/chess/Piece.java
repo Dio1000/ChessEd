@@ -1,5 +1,6 @@
 package me.dariansandru.domain.chess;
 
+import me.dariansandru.round.ChessRound;
 import me.dariansandru.io.exception.InputException;
 
 public interface Piece extends Comparable<Piece> {

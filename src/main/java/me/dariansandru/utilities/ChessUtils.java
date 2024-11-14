@@ -1,7 +1,7 @@
 package me.dariansandru.utilities;
 
 import me.dariansandru.domain.Player;
-import me.dariansandru.domain.chess.ChessRound;
+import me.dariansandru.round.ChessRound;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.domain.chess.piece.*;

@@ -1,6 +1,6 @@
 package me.dariansandru.domain.chess.piece;
 
-import me.dariansandru.domain.chess.ChessRound;
+import me.dariansandru.round.ChessRound;
 import me.dariansandru.domain.chess.Piece;
 import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.io.exception.InputException;
@@ -60,10 +60,6 @@ public class King implements Piece {
 
         if (display.isEmpty() || Objects.equals(display, "Error")) return;
         this.display = ChessUtils.getPieceDisplay(this.getName(), this.getColour());
-    }
-
-    public boolean inCheck(ChessRound chessRound) {
-        return true;
     }
 
     @Override
