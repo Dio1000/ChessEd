@@ -11,6 +11,10 @@ import me.dariansandru.utilities.ChessUtils;
 
 import java.util.List;
 
+/**
+ * Users of this object can interact with the user of the application
+ * in order to show data and get input.
+ */
 public class ChessConsoleUI implements ConsoleUI{
 
     private final InputDevice inputDevice;
@@ -23,16 +27,30 @@ public class ChessConsoleUI implements ConsoleUI{
         this.chessController = chessController;
     }
 
+    /**
+     * Gets the OutputDevice the Console uses.
+     * @return OutputDevice that is used.
+     */
     @Override
     public OutputDevice getOutputDevice() {
         return outputDevice;
     }
 
+    /**
+     * Gets the InputDevice the Console uses.
+     * @return InputDevice that is used.
+     */
     @Override
     public InputDevice getInputDevice() {
         return inputDevice;
     }
 
+    /**
+     * Displays the game and allows for input / output.
+     * @throws InputException Thrown when input validation fails.
+     * @throws OutputException Thrown when output validation fails.
+     * @throws ValidatorException Thrown when validator fails.
+     */
     @Override
     public void show() throws InputException, OutputException, ValidatorException {
         String writeFile = "files/chessCurrentGame.txt";
@@ -79,6 +97,10 @@ public class ChessConsoleUI implements ConsoleUI{
         outputDevice.emptyFile(writeFile);
     }
 
+    /**
+     * Shows the game that was stopped during the previous session.
+     * @throws InputException Thrown if the input validation fails.
+     */
     public void showResumedGame() throws InputException {
         String writeFile = "files/chessCurrentGame.txt";
         List<String> moveList = inputDevice.readFile(writeFile);
@@ -89,6 +111,9 @@ public class ChessConsoleUI implements ConsoleUI{
         }
     }
 
+    /**
+     * Shows the moves that were played during the game.
+     */
     public void displayMoves(){
         int move = 1;
 
@@ -100,6 +125,9 @@ public class ChessConsoleUI implements ConsoleUI{
         }
     }
 
+    /**
+     * Shows the Chess board from the white piece player perspective.
+     */
     public void displayBoard(){
         outputDevice.writeLine(chessController.getBlackPiecesPlayer().getUsername() + " " +
                 ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.BLACK));
@@ -115,6 +143,9 @@ public class ChessConsoleUI implements ConsoleUI{
                 ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.WHITE));
     }
 
+    /**
+     * Shows the Chess board from the black pieces player perspective.
+     */
     public void displayRotatedBoard() {
         outputDevice.writeLine(chessController.getWhitePiecesPlayer().getUsername() + " " +
                 ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.WHITE));

@@ -12,19 +12,38 @@ import me.dariansandru.io.exception.InputException;
 import java.io.File;
 import java.util.*;
 
+/**
+ * Using this abstract class allows the user to use
+ * a set of different functions related to the Chess game.
+ */
 public abstract class ChessUtils {
 
     public static InputDevice inputDevice = new InputDevice();
     public static OutputDevice outputDevice = new OutputDevice();
 
+    /**
+     * Gets the number of a certain character in alphabetic order.
+     * @param chr char to get the number for
+     * @return Integer representing the obtained number.
+     */
     public static int getNumber(char chr){
         return chr - 'a';
     }
 
+    /**
+     * Gets the letter of a certain integer in alphabetic order.
+     * @param num Integer to get the letter for.
+     * @return String representing the obtained letter.
+     */
     public static String getLetter(int num){
         return String.valueOf((char) ('a' + num));
     }
 
+    /**
+     * Checks that a piece representation that can be empty is valid in the game of Chess.
+     * @param piece Piece representation (char) that is validated.
+     * @return true if the piece is valid, false otherwise.
+     */
     public static boolean isValidPiece(char piece){
         char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'P', 'K', 'Q', 'R', 'B', 'N', ' '};
 
@@ -36,6 +55,11 @@ public abstract class ChessUtils {
         return false;
     }
 
+    /**
+     * Checks that a piece representation that can be empty is valid in the game of Chess.
+     * @param piece Piece representation (String) that is validated.
+     * @return true if the piece is valid, false otherwise.
+     */
     public static boolean isValidPiece(String piece){
         char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'P', 'K', 'Q', 'R', 'B', 'N', ' '};
         char _piece = piece.charAt(0);
@@ -48,6 +72,11 @@ public abstract class ChessUtils {
         return false;
     }
 
+    /**
+     * Checks that a piece representation that cannot be empty is valid in the game of Chess.
+     * @param piece Piece representation that is validated.
+     * @return true if the piece is valid, false otherwise.
+     */
     public static boolean isValidNonEmptyPiece(String piece){
         char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'K', 'Q', 'R', 'B', 'N'};
         char _piece = piece.charAt(0);
@@ -60,11 +89,21 @@ public abstract class ChessUtils {
         return false;
     }
 
+    /**
+     * Used to convert chars row and col to valid integers.
+     * @param col Column that is converted.
+     * @param row Row that is converted.
+     * @return Pair containing the valid input representation.
+     */
     public static Pair<Integer, Integer> charsToMovePair(char col, char row){
         return new Pair<>(col - 'a', row - '1');
     }
 
-    // Inshallah
+    /**
+     * Used to find the column and the row from a move.
+     * @param move Move that you get the column and row for.
+     * @return Pair containing the column and row.
+     */
     public static Pair<Integer, Integer> getColRow(String move){
         if (move.length() == 2){
             return charsToMovePair(move.charAt(0), move.charAt(1));
@@ -97,6 +136,13 @@ public abstract class ChessUtils {
         return new Pair<>(-1, -1);
     }
 
+    /**
+     * Used to create a piece object.
+     * @param representation The representation of the piece that is created.
+     * @param pieceColour The colour of the piece that is created.
+     * @return The piece object.
+     * @throws InputException Thrown when input validation fails.
+     */
     public static Piece getPiece(String representation, PieceColour pieceColour) throws InputException {
         return switch (representation) {
             case "B" -> new Bishop(pieceColour);
@@ -109,6 +155,13 @@ public abstract class ChessUtils {
         };
     }
 
+    /**
+     * Gets the display of a piece that was set in the chessPieceRepresentation.txt file.
+     * @param piece Piece that you get the display for.
+     * @param colour Colour of the piece.
+     * @return String representing the display.
+     * @throws InputException Thrown when the input validation fails.
+     */
     public static String getPieceDisplay(String piece, PieceColour colour) throws InputException {
         String readFile = "files/chessPieceRepresentation.txt";
         List<String> list;
@@ -142,6 +195,11 @@ public abstract class ChessUtils {
         return "Error";
     }
 
+    /**
+     * Used to find the Player with the highest Win / Loss ratio.
+     * @param playerSet Set of the players.
+     * @return Player that was found.
+     */
     public static Player getHighestRatedPlayer(Set<Player> playerSet){
         Player highestRatedPlayer = null;
 
@@ -157,6 +215,11 @@ public abstract class ChessUtils {
         return highestRatedPlayer;
     }
 
+    /**
+     * Used to find the Player with the lowest Win / Loss ratio.
+     * @param playerSet Set of the players.
+     * @return Player that was found.
+     */
     public static Player getLowestRatedPlayer(Set<Player> playerSet){
         Player lowestRatedPlayer = null;
 
@@ -172,6 +235,10 @@ public abstract class ChessUtils {
         return lowestRatedPlayer;
     }
 
+    /**
+     * Used to sort the players in-place by their Win / Loss ratio.
+     * @param playerList List of the players.
+     */
     public static void getPlayerRanking(List<Player> playerList){
         int length = playerList.size();
 
@@ -188,6 +255,12 @@ public abstract class ChessUtils {
         }
     }
 
+    /**
+     * Gets the material points of a player.
+     * @param chessRound ChessRound the players are using.
+     * @param colour Colour of the pieces the player is using.
+     * @return Int representing the material points.
+     */
     private static int getColourMaterial(ChessRound chessRound, PieceColour colour){
         Piece[][] pieces = chessRound.getPieces();
         int totalPoints = 0;
@@ -203,6 +276,12 @@ public abstract class ChessUtils {
         return totalPoints;
     }
 
+    /**
+     * Used to get the material advantage of a player.
+     * @param chessRound ChessRound the players are using.
+     * @param colour Colour of the pieces the player is using.
+     * @return Int representing the material advantage.
+     */
     public static int getColourMaterialAdvantage(ChessRound chessRound, PieceColour colour){
         int whitePiecePlayerPoints = getColourMaterial(chessRound, PieceColour.WHITE);
         int blackPiecePlayerPoints = getColourMaterial(chessRound, PieceColour.BLACK);

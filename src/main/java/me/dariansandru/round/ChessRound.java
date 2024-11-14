@@ -15,6 +15,9 @@ import java.util.Set;
 
 import static me.dariansandru.utilities.ChessUtils.getLetter;
 
+/**
+ * Using this object allows the user to set up a round of Chess.
+ */
 public class ChessRound implements GameRound{
 
     private final Player whitePiecesPlayer;
@@ -29,20 +32,19 @@ public class ChessRound implements GameRound{
         resetBoard();
     }
 
-
-    public Piece getPiece(int row, int col){
-        return pieces[row][col];
-    }
-
-    public Piece[][] getPieces(){
-        return pieces;
-    }
-
+    /**
+     * Resets the board of the Chess round.
+     * @throws InputException Thrown when input validation fails.
+     */
     @Override
     public void resetBoard() throws InputException {
         setPieceLocation();
     }
 
+    /**
+     * Sets the location of the pieces on the Chess board.
+     * @throws InputException Thrown when input validation fails.
+     */
     @Override
     public void setPieceLocation() throws InputException {
         this.pieces[0][0] = new Rook(PieceColour.WHITE);
@@ -88,6 +90,30 @@ public class ChessRound implements GameRound{
         }
     }
 
+    /**
+     * Gets the piece on a certain row and column.
+     * @param row Row of the piece.
+     * @param col Column of the piece.
+     * @return Piece object on the specified square.
+     */
+    public Piece getPiece(int row, int col){
+        return pieces[row][col];
+    }
+
+    /**
+     * Gets the Chess board that is currently being played on.
+     * @return Piece matrix representing the board.
+     */
+    public Piece[][] getPieces(){
+        return pieces;
+    }
+
+    /**
+     * Validates a move of a piece of a certain colour.
+     * @param move Move that is played.
+     * @param colour Colour of the piece.
+     * @return Error string if validation failed, null otherwise.
+     */
     public String handleMove(String move, PieceColour colour){
         try{
             if (!ChessValidator.validMoveNotation(move)){
@@ -105,6 +131,14 @@ public class ChessRound implements GameRound{
         return null;
     }
 
+    /**
+     * Moves a piece on a certain square given by a move String.
+     * @param move Move that is being played.
+     * @param pieceColour Colour of the piece.
+     * @return True is the move can was played, false otherwise.
+     * @throws ValidatorException Thrown when the validator fails.
+     * @throws InputException Thrown when the input validation fails.
+     */
     public boolean movePiece(String move, PieceColour pieceColour) throws ValidatorException, InputException {
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
@@ -131,8 +165,14 @@ public class ChessRound implements GameRound{
         return false;
     }
 
-    //TODO Don't like this idea, will refactor later
-    public boolean checkMovePiece(String move, PieceColour pieceColour) throws ValidatorException, InputException {
+    /**
+     * Checks if a move can be played.
+     * @param move Move that is played.
+     * @param pieceColour Colour of the piece.
+     * @return True if the move can be played, false otherwise.
+     * @throws ValidatorException Thrown if the validation fails.
+     */
+    public boolean checkMovePiece(String move, PieceColour pieceColour) throws ValidatorException {
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
 
@@ -156,6 +196,15 @@ public class ChessRound implements GameRound{
         return false;
     }
 
+    /**
+     * Checks if the king is checked (can be seen by enemy piece).
+     * @param kingRow Row the king is on.
+     * @param kingCol Column the king is on.
+     * @param pieceColour Colour of the king.
+     * @return True if the king is checked, false otherwise.
+     * @throws ValidatorException Thrown if the validation fails.
+     * @throws InputException Thrown if the input validator fails.
+     */
     private boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException, InputException {
         PieceColour oppositeColour = (pieceColour == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
 
@@ -171,6 +220,14 @@ public class ChessRound implements GameRound{
         return false;
     }
 
+    /**
+     * Gets the valid move of a king of a certain colour.
+     * @param chessRound ChessRound that the game is being played on.
+     * @param pieceColour Colour of the king.
+     * @return Set of strings representing the moves.
+     * @throws ValidatorException Thrown if the validator fails.
+     * @throws InputException Thrown when input validation fails.
+     */
     public Set<String> getKingValidMoves(ChessRound chessRound, PieceColour pieceColour) throws ValidatorException, InputException {
         int kingRow = -1;
         int kingCol = -1;
@@ -206,6 +263,13 @@ public class ChessRound implements GameRound{
         return validKingMoves;
     }
 
+    /**
+     * Checks if a game ended in checkmate by checking if one king is checkmated.
+     * @param pieceColour Colour of the king that is being checkmated.
+     * @return True if the king is checkmated, false otherwise.
+     * @throws ValidatorException Thrown if the validator fails.
+     * @throws InputException Thrown if the input validation fails.
+     */
     public boolean isCheckmate(PieceColour pieceColour) throws ValidatorException, InputException {
         Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
         if (kingValidMoves.isEmpty()) return false;
@@ -220,10 +284,18 @@ public class ChessRound implements GameRound{
         return true;
     }
 
+    /**
+     * Checks if a game ended in checkmate by checking if either king is checkmated.
+     * @return True if the game is in checkmate, false otherwise.
+     */
     public boolean isCheckmate() throws ValidatorException, InputException {
         return isCheckmate(PieceColour.WHITE) || isCheckmate(PieceColour.BLACK);
     }
 
+    /**
+     * Checks if a game ended in stalemate.
+     * @return True if the game is in stalemate, false otherwise.
+     */
     public boolean isStalemate(){
         return false;
     }
