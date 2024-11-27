@@ -297,4 +297,16 @@ public abstract class ChessUtils {
         }
     }
 
+    public static Pair<Integer, Integer> getKingLocation(ChessRound chessRound, PieceColour colour){
+        Piece[][] pieces = chessRound.getPieces();
+
+        for (int row = 0 ; row < 8 ; row++){
+            for (int col = 0 ; col < 8 ; col++){
+                if (Objects.equals(pieces[row][col].getName(), "King")) return new Pair<>(row, col);
+            }
+        }
+
+        return new Pair<>(-1, -1);
+    }
+
 }

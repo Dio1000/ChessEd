@@ -69,4 +69,3 @@ public class Main {
 
 //TODO Fix ambiguous moves
 //TODO Add en passant and castling
-//TODO make GameRound an interface

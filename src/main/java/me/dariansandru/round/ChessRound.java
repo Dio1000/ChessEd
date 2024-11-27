@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static me.dariansandru.utilities.ChessUtils.getKingLocation;
 import static me.dariansandru.utilities.ChessUtils.getLetter;
 
 /**
@@ -293,11 +294,27 @@ public class ChessRound implements GameRound{
     }
 
     /**
+     * Checks if a given colour king is stalemated.
+     * @param pieceColour Colour of the king that is checked.
+     * @return True if given king is stalemated, false otherwise.
+     * @throws ValidatorException Thrown if validator fails.
+     * @throws InputException Thrown if input validation fails.
+     */
+    public boolean isStalemate(PieceColour pieceColour) throws ValidatorException, InputException {
+        Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
+        if (kingValidMoves.isEmpty()) return false;
+
+        if (isKingChecked(getKingLocation(this, pieceColour).getValue1(),
+                getKingLocation(this, pieceColour).getValue2(), pieceColour)) return false;
+        return isCheckmate(pieceColour);
+    }
+
+    /**
      * Checks if a game ended in stalemate.
      * @return True if the game is in stalemate, false otherwise.
      */
-    public boolean isStalemate(){
-        return false;
+    public boolean isStalemate() throws ValidatorException, InputException {
+        return isStalemate(PieceColour.WHITE) || isStalemate(PieceColour.BLACK);
     }
 
 }
