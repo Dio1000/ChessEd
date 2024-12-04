@@ -12,9 +12,11 @@ import me.dariansandru.utilities.ChessUtils;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import static me.dariansandru.utilities.ChessUtils.getKingLocation;
-import static me.dariansandru.utilities.ChessUtils.getLetter;
+import static me.dariansandru.utilities.ChessUtils.*;
 
 /**
  * Using this object allows the user to set up a round of Chess.
@@ -184,17 +186,36 @@ public class ChessRound implements GameRound{
         }
         else piece = "P";
 
+        AtomicBoolean OK = new AtomicBoolean(false);
+        var threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        var latch = new CountDownLatch(8);
+
         for (int currentRow = 0 ; currentRow < 8 ; currentRow++){
-            for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
-                if (Objects.equals(pieces[currentRow][currentCol].getRepresentation(), piece)
-                        && pieces[currentRow][currentCol].getColour() == pieceColour
-                        && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
-                        && ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
-                    return true;
+            int finalCurrentRow = currentRow;
+            threadPool.execute(() -> {
+                for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
+                    if (Objects.equals(pieces[finalCurrentRow][currentCol].getRepresentation(), piece)
+                            && pieces[finalCurrentRow][currentCol].getColour() == pieceColour
+                            && pieces[finalCurrentRow][currentCol].isLegalMove(this, finalCurrentRow, currentCol, move)
+                            && ChessValidator.validateObstruction(this, piece, finalCurrentRow, currentCol, row, col)){
+                        OK.set(true);
+                        latch.countDown();
+                        return;
+                    }
                 }
-            }
+                latch.countDown();
+            });
         }
-        return false;
+
+        try{
+            latch.await();
+        }
+        catch (InterruptedException e){
+            throw new RuntimeException(e);
+        }
+        threadPool.shutdownNow();
+
+        return OK.get();
     }
 
     /**
@@ -301,12 +322,7 @@ public class ChessRound implements GameRound{
      * @throws InputException Thrown if input validation fails.
      */
     public boolean isStalemate(PieceColour pieceColour) throws ValidatorException, InputException {
-        Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
-        if (kingValidMoves.isEmpty()) return false;
-
-        if (isKingChecked(getKingLocation(this, pieceColour).getValue1(),
-                getKingLocation(this, pieceColour).getValue2(), pieceColour)) return false;
-        return isCheckmate(pieceColour);
+        return false;
     }
 
     /**
