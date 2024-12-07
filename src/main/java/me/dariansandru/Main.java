@@ -10,6 +10,7 @@ import me.dariansandru.io.exception.InputException;
 import me.dariansandru.io.exception.OutputException;
 import me.dariansandru.ui.consoleUI.ChessConsoleUI;
 import me.dariansandru.ui.gui.ChessGUI;
+import me.dariansandru.ui.guiController.GUIController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,20 +44,11 @@ public class Main {
         switch (args[0].toLowerCase()) {
             case "gui" -> {
                 ChessController chessController = new ChessController(p1, p2);
+                ChessConsoleUI chessConsoleUI = new ChessConsoleUI(inputDevice, outputDevice, chessController);
 
-                JFrame frame = new JFrame("Chess GUI");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setSize(1200, 800);
-                ChessGUI chessPanel = new ChessGUI(chessController.getChessRound());
+                GUIController guiController = new GUIController(chessConsoleUI);
 
-                JPanel rightPanel = new JPanel();
-                rightPanel.setBackground(Color.LIGHT_GRAY);
-
-                frame.setLayout(new BorderLayout());
-                frame.add(chessPanel, BorderLayout.WEST);
-                frame.add(rightPanel, BorderLayout.CENTER);
-
-                frame.setVisible(true);
+                guiController.run();
             }
             case "play" -> {
                 p1.setUsername(args[1]);

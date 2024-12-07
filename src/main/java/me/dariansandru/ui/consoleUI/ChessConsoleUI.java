@@ -27,6 +27,10 @@ public class ChessConsoleUI implements ConsoleUI {
         this.chessController = chessController;
     }
 
+    public ChessController getChessController() {
+        return chessController;
+    }
+
     /**
      * Gets the OutputDevice the Console uses.
      * @return OutputDevice that is used.
