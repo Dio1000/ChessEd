@@ -9,11 +9,8 @@ import me.dariansandru.domain.chess.Manual;
 import me.dariansandru.io.exception.InputException;
 import me.dariansandru.io.exception.OutputException;
 import me.dariansandru.ui.consoleUI.ChessConsoleUI;
-import me.dariansandru.ui.gui.ChessGUI;
-import me.dariansandru.ui.guiController.GUIController;
+import me.dariansandru.ui.gui.GUIController;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Objects;
 
 public class Main {

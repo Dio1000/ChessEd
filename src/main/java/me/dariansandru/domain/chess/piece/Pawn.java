@@ -1,8 +1,6 @@
 package me.dariansandru.domain.chess.piece;
 
 import me.dariansandru.round.ChessRound;
-import me.dariansandru.domain.chess.Piece;
-import me.dariansandru.domain.chess.PieceColour;
 import me.dariansandru.io.exception.InputException;
 import me.dariansandru.utilities.ChessUtils;
 

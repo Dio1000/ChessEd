@@ -1,7 +1,8 @@
 package me.dariansandru.round;
 
-import me.dariansandru.domain.chess.Piece;
-import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.chess.chessEngine.ChessEngine;
+import me.dariansandru.domain.chess.piece.Piece;
+import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.domain.Player;
 import me.dariansandru.domain.validator.ChessValidator;
@@ -26,12 +27,14 @@ public class ChessRound implements GameRound{
 
     private final Player whitePiecesPlayer;
     private final Player blackPiecesPlayer;
+    private final ChessEngine chessEngine = new ChessEngine();
 
     private final Piece[][] pieces = new Piece[8][8];
 
     public ChessRound(Player whitePiecesPlayer, Player blackPiecesPlayer) throws InputException {
         this.whitePiecesPlayer = whitePiecesPlayer;
         this.blackPiecesPlayer = blackPiecesPlayer;
+        chessEngine.setChessRound(this);
 
         resetBoard();
     }
@@ -147,6 +150,8 @@ public class ChessRound implements GameRound{
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
 
+        if (col < 0 || row < 0) return false;
+
         String piece;
         if (ChessValidator.validMovePieceNotation(move.charAt(0))){
             if ('a' <= move.charAt(0) && move.charAt(0) <= 'h') piece = "P";
@@ -179,6 +184,8 @@ public class ChessRound implements GameRound{
     public boolean checkMovePiece(String move, PieceColour pieceColour) throws ValidatorException {
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
+
+        if (row < 0 || col < 0) return false;
 
         String piece;
         if (ChessValidator.validMovePieceNotation(move.charAt(0))){
@@ -252,8 +259,9 @@ public class ChessRound implements GameRound{
      * @throws ValidatorException Thrown if the validation fails.
      * @throws InputException Thrown if the input validator fails.
      */
-    private boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException, InputException {
+    public boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException, InputException {
         PieceColour oppositeColour = (pieceColour == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
+        if (kingCol < 0 || kingRow < 0) return false;
 
         for (int row = 0 ; row < 8 ; row++){
             for (int col = 0 ; col < 8 ; col++){
@@ -287,12 +295,13 @@ public class ChessRound implements GameRound{
                     && pieces[row][col].getColour() == pieceColour){
                     kingRow = row;
                     kingCol = col;
-
                 }
             }
         }
 
         Set<String> validKingMoves = new HashSet<>();
+
+        if (kingRow == 0 || kingCol == 0) return validKingMoves;
 
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
@@ -356,6 +365,13 @@ public class ChessRound implements GameRound{
      */
     public boolean isStalemate() throws ValidatorException, InputException {
         return isStalemate(PieceColour.WHITE) || isStalemate(PieceColour.BLACK);
+    }
+
+    public int computeAdvantage() throws ValidatorException, InputException {
+        int whitePiecesPlayerScore = chessEngine.evaluatePosition(PieceColour.WHITE);
+        int blackPiecesPlayerScore = -chessEngine.evaluatePosition(PieceColour.BLACK);
+
+        return whitePiecesPlayerScore - blackPiecesPlayerScore;
     }
 
 }

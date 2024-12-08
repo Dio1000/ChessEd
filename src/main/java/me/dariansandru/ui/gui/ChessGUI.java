@@ -1,7 +1,7 @@
 package me.dariansandru.ui.gui;
 
-import me.dariansandru.domain.chess.Piece;
-import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.chess.piece.Piece;
+import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.chess.piece.Pawn;
 import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.exception.InputException;
@@ -87,6 +87,7 @@ public class ChessGUI extends JPanel {
         int startRow = chessRound.getStartLocation(move, colour).getValue1();
         int startCol = chessRound.getStartLocation(move, colour).getValue2();
 
+        // TODO CAREFUL HANDLING!!!
         Piece pieceToMove = ChessUtils.getPiece(String.valueOf(move.charAt(0)), colour);
         if (Objects.equals(pieceToMove.getName(), "None")) pieceToMove = new Pawn(colour);
 

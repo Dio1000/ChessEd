@@ -2,8 +2,8 @@ package me.dariansandru.utilities;
 
 import me.dariansandru.domain.Player;
 import me.dariansandru.round.ChessRound;
-import me.dariansandru.domain.chess.Piece;
-import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.chess.piece.Piece;
+import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.chess.piece.*;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
@@ -261,7 +261,7 @@ public abstract class ChessUtils {
      * @param colour Colour of the pieces the player is using.
      * @return Int representing the material points.
      */
-    private static int getColourMaterial(ChessRound chessRound, PieceColour colour){
+    public static int getColourMaterial(ChessRound chessRound, PieceColour colour){
         Piece[][] pieces = chessRound.getPieces();
         int totalPoints = 0;
 
@@ -287,10 +287,10 @@ public abstract class ChessUtils {
         int blackPiecePlayerPoints = getColourMaterial(chessRound, PieceColour.BLACK);
 
         if (colour == PieceColour.WHITE){
-            return Math.max(whitePiecePlayerPoints - blackPiecePlayerPoints, 0);
+            return whitePiecePlayerPoints - blackPiecePlayerPoints;
         }
         else if (colour == PieceColour.BLACK){
-            return Math.max(blackPiecePlayerPoints - whitePiecePlayerPoints, 0);
+            return blackPiecePlayerPoints - whitePiecePlayerPoints;
         }
         else{
             throw new IllegalArgumentException(colour.toString() + " is not a valid colour!");

@@ -1,8 +1,8 @@
 package me.dariansandru.controller;
 
 import me.dariansandru.domain.Player;
-import me.dariansandru.domain.chess.Piece;
-import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.chess.piece.Piece;
+import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.round.ChessRound;
 import me.dariansandru.io.exception.InputException;

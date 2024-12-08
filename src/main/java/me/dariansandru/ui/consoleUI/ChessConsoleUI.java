@@ -1,7 +1,9 @@
 package me.dariansandru.ui.consoleUI;
 
 import me.dariansandru.controller.ChessController;
-import me.dariansandru.domain.chess.PieceColour;
+import me.dariansandru.domain.chess.chessEngine.ChessEngine;
+import me.dariansandru.domain.chess.chessEngine.ChessEngineUtils;
+import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
@@ -20,11 +22,13 @@ public class ChessConsoleUI implements ConsoleUI {
     private final InputDevice inputDevice;
     private final OutputDevice outputDevice;
     private final ChessController chessController;
+    private final ChessEngine chessEngine = new ChessEngine();
 
     public ChessConsoleUI(InputDevice inputDevice, OutputDevice outputDevice, ChessController chessController) {
         this.inputDevice = inputDevice;
         this.outputDevice = outputDevice;
         this.chessController = chessController;
+        chessEngine.setChessRound(this.chessController.getChessRound());
     }
 
     public ChessController getChessController() {
@@ -69,10 +73,12 @@ public class ChessConsoleUI implements ConsoleUI {
             turn = chessController.getTurnCount();
 
             if (turn % 2 == 0) {
+                outputDevice.writeLine(computeAdvantage());
                 displayBoard();
                 outputDevice.write("White to move: ");
             }
             else {
+                outputDevice.writeLine(computeAdvantage());
                 displayRotatedBoard();
                 outputDevice.write("Black to move: ");
             }
@@ -163,5 +169,12 @@ public class ChessConsoleUI implements ConsoleUI {
 
         outputDevice.writeLine(chessController.getBlackPiecesPlayer().getUsername() + " " +
                 ChessUtils.getColourMaterialAdvantage(chessController.getChessRound(), PieceColour.BLACK));
+    }
+
+    public int computeAdvantage() throws ValidatorException, InputException {
+        int whitePiecesPlayerScore = chessEngine.evaluatePosition(PieceColour.WHITE);
+        int blackPiecesPlayerScore = -chessEngine.evaluatePosition(PieceColour.BLACK);
+
+        return whitePiecesPlayerScore - blackPiecesPlayerScore;
     }
 }
