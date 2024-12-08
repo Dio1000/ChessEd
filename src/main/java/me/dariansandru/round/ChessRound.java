@@ -8,6 +8,7 @@ import me.dariansandru.domain.validator.ChessValidator;
 import me.dariansandru.domain.chess.piece.*;
 import me.dariansandru.io.exception.InputException;
 import me.dariansandru.utilities.ChessUtils;
+import me.dariansandru.utilities.Pair;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -216,6 +217,30 @@ public class ChessRound implements GameRound{
         threadPool.shutdownNow();
 
         return OK.get();
+    }
+
+    public Pair<Integer, Integer> getStartLocation(String move, PieceColour pieceColour) throws ValidatorException, InputException {
+        int col = ChessUtils.getColRow(move).getValue1();
+        int row = ChessUtils.getColRow(move).getValue2();
+
+        String piece;
+        if (ChessValidator.validMovePieceNotation(move.charAt(0))){
+            if ('a' <= move.charAt(0) && move.charAt(0) <= 'h') piece = "P";
+            else piece = String.valueOf(move.charAt(0));
+        }
+        else piece = "P";
+
+        for (int currentRow = 0 ; currentRow < 8 ; currentRow++){
+            for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
+                if (Objects.equals(pieces[currentRow][currentCol].getRepresentation(), piece)
+                        && pieces[currentRow][currentCol].getColour() == pieceColour
+                        && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
+                        && ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
+                    return new Pair<>(currentRow, currentCol);
+                }
+            }
+        }
+        return new Pair<>(-1, -1);
     }
 
     /**

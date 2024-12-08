@@ -11,19 +11,22 @@ import me.dariansandru.ui.gui.ChessGUI;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * Using this object allows the user to control the GUI of a Chess game.
+ */
 public class GUIController {
-    private final ChessConsoleUI chessConsoleUI;
-    private final ChessController chessController;
     private final ChessRound chessRound;
     private int turnCounter;
 
     public GUIController(ChessConsoleUI chessConsoleUI)
     {
-        this.chessConsoleUI = chessConsoleUI;
-        this.chessController = this.chessConsoleUI.getChessController();
+        ChessController chessController = chessConsoleUI.getChessController();
         this.chessRound = chessController.getChessRound();
     }
 
+    /**
+     * Runs the logic of a Chess game.
+     */
     public void run() {
         JFrame frame = new JFrame("Chess GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -53,18 +56,31 @@ public class GUIController {
             try {
                 String move = moveInput.getText();
                 PieceColour colour = (turnCounter % 2 == 0) ? PieceColour.WHITE : PieceColour.BLACK;
-                while (!chessRound.movePiece(move, colour)){
+                while (!chessRound.checkMovePiece(move, colour)){
                     error.setText("Invalid move");
 
                     moveInput.setText("");
                     move = moveInput.getText();
                 }
+                chessPanel.updateBoard(move, colour);
+                chessRound.movePiece(move, colour);
 
-                chessPanel.drawBoard();
                 turnCounter++;
-
                 moveInput.setText("");
                 error.setText("");
+
+                if (chessRound.isCheckmate()) {
+                    String winner = (turnCounter % 2 == 0) ? "Black" : "White";
+
+                    JOptionPane.showMessageDialog(frame, winner + " won by checkmate!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
+
+                    turnCounter = 0;
+                    chessRound.resetBoard();
+                    chessPanel.drawBoard();
+                    moveInput.setText("");
+                    error.setText("");
+                }
+
             } catch (ValidatorException | InputException ex) {
                 throw new RuntimeException(ex);
             }

@@ -145,10 +145,10 @@ public abstract class ChessUtils {
      */
     public static Piece getPiece(String representation, PieceColour pieceColour) throws InputException {
         return switch (representation) {
+            case "", "P" -> new Pawn(pieceColour);
             case "B" -> new Bishop(pieceColour);
             case "K" -> new King(pieceColour);
             case "N" -> new Knight(pieceColour);
-            case "P" -> new Pawn(pieceColour);
             case "Q" -> new Queen(pieceColour);
             case "R" -> new Rook(pieceColour);
             default -> new EmptyPiece();
