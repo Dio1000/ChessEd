@@ -78,7 +78,7 @@ public abstract class ChessUtils {
      * @return true if the piece is valid, false otherwise.
      */
     public static boolean isValidNonEmptyPiece(String piece){
-        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'K', 'Q', 'R', 'B', 'N'};
+        char[] validPieces = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'K', 'Q', 'R', 'B', 'N', 'P'};
         char _piece = piece.charAt(0);
 
         for (char p : validPieces){
@@ -297,7 +297,7 @@ public abstract class ChessUtils {
         }
     }
 
-    public static Pair<Integer, Integer> getKingLocation(ChessRound chessRound, PieceColour colour){
+    public static Pair<Integer, Integer> getKingLocation(ChessRound chessRound){
         Piece[][] pieces = chessRound.getPieces();
 
         for (int row = 0 ; row < 8 ; row++){

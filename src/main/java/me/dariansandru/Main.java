@@ -78,3 +78,6 @@ public class Main {
 
 //TODO Fix ambiguous moves
 //TODO Add en passant and castling
+//TODO fix checkmate
+//TODO add stalemate
+//TODO refactor weights for the engine

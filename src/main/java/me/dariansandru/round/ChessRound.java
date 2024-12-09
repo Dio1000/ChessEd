@@ -150,6 +150,9 @@ public class ChessRound implements GameRound{
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
 
+        int kingRow = getKingLocation(this).getValue1();
+        int kingCol = getKingLocation(this).getValue2();
+
         if (col < 0 || row < 0) return false;
 
         String piece;
@@ -165,8 +168,17 @@ public class ChessRound implements GameRound{
                         && pieces[currentRow][currentCol].getColour() == pieceColour
                         && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
                         && ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
+                    Piece oldPiece = pieces[currentRow][currentCol];
                     pieces[currentRow][currentCol] = new EmptyPiece();
+
+                    Piece takenPiece = pieces[row][col];
                     pieces[row][col] = ChessUtils.getPiece(piece, pieceColour);
+
+                    if (isKingChecked(kingRow, kingCol, pieceColour)){
+                        pieces[currentRow][currentCol] = oldPiece;
+                        pieces[row][col] = takenPiece;
+                        return false;
+                    }
                     return true;
                 }
             }
@@ -226,6 +238,14 @@ public class ChessRound implements GameRound{
         return OK.get();
     }
 
+    /**
+     * Gets the starting row and column of a valid move.
+     * @param move Move that was played.
+     * @param pieceColour Colour of the piece that was moved.
+     * @return Pair with row as value1, column as value2, or -1 for both values if the move is invalid.
+     * @throws ValidatorException Thrown when the validation fails.
+     * @throws InputException Thrown when input validation fails.
+     */
     public Pair<Integer, Integer> getStartLocation(String move, PieceColour pieceColour) throws ValidatorException, InputException {
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
@@ -257,16 +277,15 @@ public class ChessRound implements GameRound{
      * @param pieceColour Colour of the king.
      * @return True if the king is checked, false otherwise.
      * @throws ValidatorException Thrown if the validation fails.
-     * @throws InputException Thrown if the input validator fails.
      */
-    public boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException, InputException {
+    public boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException {
         PieceColour oppositeColour = (pieceColour == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
         if (kingCol < 0 || kingRow < 0) return false;
 
         for (int row = 0 ; row < 8 ; row++){
             for (int col = 0 ; col < 8 ; col++){
                 if (!Objects.equals(pieces[row][col].getName(), "None")){
-                    String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + kingRow;
+                    String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + (kingRow + 1);
                     if (checkMovePiece(move, oppositeColour)) return true;
                 }
             }
@@ -276,14 +295,37 @@ public class ChessRound implements GameRound{
     }
 
     /**
+     * Gets the row and the column of the piece that attacks the king.
+     * @param kingRow Row the king is on.
+     * @param kingCol Column the king is on.
+     * @param pieceColour Colour of the piece.
+     * @return Pair with row as value1, column as value2, or -1 for both is move is invalid.
+     * @throws ValidatorException Thrown if input validation fails.
+     */
+    public Pair<Integer, Integer> getKingAttackerLocation(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException {
+        PieceColour oppositeColour = (pieceColour == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
+        if (kingCol < 0 || kingRow < 0) return new Pair<>(-1, -1);
+
+        for (int row = 0 ; row < 8 ; row++){
+            for (int col = 0 ; col < 8 ; col++){
+                if (!Objects.equals(pieces[row][col].getName(), "None")){
+                    String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + kingRow;
+                    if (checkMovePiece(move, oppositeColour)) return new Pair<>(row, col);
+                }
+            }
+        }
+
+        return new Pair<>(-1, -1);
+    }
+
+    /**
      * Gets the valid move of a king of a certain colour.
      * @param chessRound ChessRound that the game is being played on.
      * @param pieceColour Colour of the king.
      * @return Set of strings representing the moves.
      * @throws ValidatorException Thrown if the validator fails.
-     * @throws InputException Thrown when input validation fails.
      */
-    public Set<String> getKingValidMoves(ChessRound chessRound, PieceColour pieceColour) throws ValidatorException, InputException {
+    public Set<String> getKingValidMoves(ChessRound chessRound, PieceColour pieceColour) throws ValidatorException {
         int kingRow = -1;
         int kingCol = -1;
 
@@ -300,19 +342,15 @@ public class ChessRound implements GameRound{
         }
 
         Set<String> validKingMoves = new HashSet<>();
-
-        if (kingRow == 0 || kingCol == 0) return validKingMoves;
-
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
                 int newRow = kingRow + j + 1;
                 int newCol = kingCol + i;
-
                 if (newCol < 0 || newRow < 0 || newCol > 7 || newRow > 7) continue;
 
                 String move = "K" + ChessUtils.getLetter(newCol) + (newRow + 1);
 
-                if (checkMovePiece(move, pieceColour)) validKingMoves.add(move);
+                if (checkMovePiece(move, pieceColour) && !isKingChecked(newCol, newRow, pieceColour)) validKingMoves.add(move);
             }
         }
 
@@ -320,24 +358,75 @@ public class ChessRound implements GameRound{
     }
 
     /**
+     * Checks if the king can move out of check.
+     * @param pieceColour Colour of the king.
+     * @return True if the king can move out of check, false otherwise.
+     * @throws ValidatorException Thrown if validation fails.
+     */
+    public boolean canMoveOutOfCheck(PieceColour pieceColour) throws ValidatorException {
+        Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
+
+        for (String move : kingValidMoves){
+            int col = ChessUtils.getColRow(move).getValue1();
+            int row = ChessUtils.getColRow(move).getValue2();
+            if (!isKingChecked(row, col, pieceColour)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a piece can block the check on the king.
+     * @param kingRow Row the king is on.
+     * @param kingCol Column the king is on.
+     * @param pieceColour Colour of the king.
+     * @return True if there is a piece that can block the check, false otherwise.
+     * @throws ValidatorException Thrown if validation fails.
+     */
+    public boolean canBlockCheck(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException {
+        //TODO Write
+        return false;
+    }
+
+    /**
+     * Checks if a piece can capture the attacker of the king.
+     * @param kingRow Row the king is on.
+     * @param kingCol Column the king is on.
+     * @param pieceColour Colour of the king.
+     * @return True if the attacker can be captured, false otherwise.
+     * @throws ValidatorException Thrown if validation fails.
+     */
+    public boolean canTakeAttacker(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException {
+        int attackerRow = getKingAttackerLocation(kingRow, kingCol, pieceColour).getValue1();
+        int attackerCol = getKingAttackerLocation(kingRow, kingCol, pieceColour).getValue2();
+
+        for (int row = 0 ; row < 8 ; row++){
+            for (int col = 0 ; col < 8 ; col++){
+                Piece piece = pieces[row][col];
+                String move = piece.getRepresentation() + ChessUtils.getLetter(attackerCol) + (attackerRow + 1);
+
+                if (checkMovePiece(move, pieceColour)) return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Checks if a game ended in checkmate by checking if one king is checkmated.
      * @param pieceColour Colour of the king that is being checkmated.
      * @return True if the king is checkmated, false otherwise.
      * @throws ValidatorException Thrown if the validator fails.
-     * @throws InputException Thrown if the input validation fails.
      */
-    public boolean isCheckmate(PieceColour pieceColour) throws ValidatorException, InputException {
-        Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
-        if (kingValidMoves.isEmpty()) return false;
+    public boolean isCheckmate(PieceColour pieceColour) throws ValidatorException {
+        int kingRow = ChessUtils.getKingLocation(this).getValue1();
+        int kingCol = ChessUtils.getKingLocation(this).getValue2();
 
-        for (String move : kingValidMoves){
-            int row = ChessUtils.getColRow(move).getValue2();
-            int col = ChessUtils.getColRow(move).getValue1();
+        boolean isKingCheckedFlag = isKingChecked(kingRow, kingCol, pieceColour);
+        boolean canMoveFlag = canMoveOutOfCheck(pieceColour);
+        boolean canBlockFlag = canBlockCheck(kingRow, kingCol, pieceColour);
+        boolean canTakeFlag = canTakeAttacker(kingRow, kingCol, pieceColour);
 
-            if (!isKingChecked(row, col, pieceColour)) return false;
-        }
-
-        return true;
+        System.out.println(isKingCheckedFlag + " " + canMoveFlag + " " + canBlockFlag + " " + canTakeFlag);
+        return isKingCheckedFlag && !canMoveFlag && !canBlockFlag && !canTakeFlag;
     }
 
     /**
@@ -367,6 +456,12 @@ public class ChessRound implements GameRound{
         return isStalemate(PieceColour.WHITE) || isStalemate(PieceColour.BLACK);
     }
 
+    /**
+     * Computes the advantage as a positive integer for a better white position, negative integer otherwise.
+     * @return Computed advantage as an integer.
+     * @throws ValidatorException Thrown if validation fails.
+     * @throws InputException Thrown if input validation fails.
+     */
     public int computeAdvantage() throws ValidatorException, InputException {
         int whitePiecesPlayerScore = chessEngine.evaluatePosition(PieceColour.WHITE);
         int blackPiecesPlayerScore = -chessEngine.evaluatePosition(PieceColour.BLACK);

@@ -39,8 +39,12 @@ public class Pawn implements Piece {
         int newRow = ChessUtils.getColRow(move).getValue2();
         int newCol = ChessUtils.getColRow(move).getValue1();
 
-        // Case 0 - Illegal stay move
+        // Case 0.1 - Illegal stay move
         if (currentRow == newRow && currentCol == newCol) return false;
+
+        // Case 0.2 - Backwards move
+        if (this.colour == PieceColour.WHITE && newRow < currentRow) return false;
+        else if (this.colour == PieceColour.BLACK && newRow > currentRow) return false;
 
         // White pieces
         if (this.colour == PieceColour.WHITE){
@@ -58,12 +62,18 @@ public class Pawn implements Piece {
 
             // Case 2 - Move from another row
             // Case 2.1 - Move forward 1 space
-            if (currentCol == newCol) return newRow - currentRow == 1;
+            if (currentCol == newCol && Objects.equals(pieces[newRow][newCol].getName(), "None")) {
+                return newRow - currentRow == 1;
+            }
 
             // Case 2.2 - Takes another piece
             if (currentRow + 1 == newRow){
-                if (currentCol + 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation())) return true;
-                else return currentCol - 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
+                if (currentCol + 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation())) {
+                    return true;
+                }
+                else {
+                    return currentCol - 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
+                }
             }
         }
 
@@ -83,7 +93,9 @@ public class Pawn implements Piece {
 
             // Case 2 - Move from another row
             // Case 2.1 - Move forward 1 space
-            if (currentCol == newCol) return currentRow - newRow == 1;
+            if (currentCol == newCol && Objects.equals(pieces[newRow][newCol].getName(), "None")) {
+                return currentRow - newRow == 1;
+            }
 
             // Case 2.2 - Takes another piece
             if (currentRow - 1 == newRow){

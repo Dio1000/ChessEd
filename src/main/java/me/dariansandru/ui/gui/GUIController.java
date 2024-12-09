@@ -17,8 +17,14 @@ public class GUIController {
     private final ChessRound chessRound;
     private int turnCounter;
 
-    public GUIController(ChessConsoleUI chessConsoleUI)
-    {
+    // Instance variables for components
+    private ChessGUI chessPanel;
+    private JTextField moveInput;
+    private JLabel instructionLabel;
+    private JLabel error;
+    private JLabel advantageLabel;
+
+    public GUIController(ChessConsoleUI chessConsoleUI) {
         ChessController chessController = chessConsoleUI.getChessController();
         this.chessRound = chessController.getChessRound();
     }
@@ -31,27 +37,31 @@ public class GUIController {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 800);
 
-        ChessGUI chessPanel = new ChessGUI(chessRound);
+        chessPanel = new ChessGUI(chessRound);
+        moveInput = new JTextField();
+        instructionLabel = new JLabel("White to move:");
+        error = new JLabel();
+        advantageLabel = new JLabel("Advantage: 0");
 
         JPanel rightPanel = new JPanel();
         rightPanel.setBackground(Color.LIGHT_GRAY);
         rightPanel.setLayout(new BorderLayout());
 
-        JTextField moveInput = new JTextField();
         JButton submitButton = new JButton("Submit");
-        JLabel instructionLabel = new JLabel("White to move:");
-        JLabel error = new JLabel();
-        JLabel advantageLabel = new JLabel("Advantage: 0");
+        JButton resetButton = new JButton("Reset");
 
         JPanel inputPanel = new JPanel();
-        inputPanel.setLayout(new GridLayout(4, 1, 5, 5));
+        inputPanel.setLayout(new GridLayout(6, 1, 10, 10));
         inputPanel.add(instructionLabel);
         inputPanel.add(moveInput);
         inputPanel.add(submitButton);
         inputPanel.add(error);
         inputPanel.add(advantageLabel);
+        inputPanel.add(resetButton);
 
         rightPanel.add(inputPanel, BorderLayout.NORTH);
+
+        resetButton.addActionListener(e -> resetGame());
 
         submitButton.addActionListener(e -> {
             try {
@@ -71,22 +81,15 @@ public class GUIController {
                 error.setText("");
                 instructionLabel.setText((colour == PieceColour.WHITE) ? "Black to move:" : "White to move:");
 
-                int advantage = chessRound.computeAdvantage();
+                float advantage = chessRound.computeAdvantage();
                 String advantageText = (advantage > 0) ? "White +" + advantage : (advantage < 0) ? "Black " + advantage : "0";
                 advantageLabel.setText("Advantage: " + advantageText);
-                
+
                 if (chessRound.isCheckmate()) {
                     String winner = (turnCounter % 2 == 0) ? "Black" : "White";
-
                     JOptionPane.showMessageDialog(frame, winner + " won by checkmate!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
 
-                    turnCounter = 0;
-                    chessRound.resetBoard();
-                    chessPanel.drawBoard();
-                    moveInput.setText("");
-                    error.setText("");
-                    instructionLabel.setText("White to move:");
-                    advantageLabel.setText("Advantage: 0");
+                    resetGame();
                 }
 
             } catch (ValidatorException | InputException ex) {
@@ -96,7 +99,6 @@ public class GUIController {
             }
         });
 
-
         frame.setLayout(new BorderLayout());
         frame.add(chessPanel, BorderLayout.WEST);
         frame.add(rightPanel, BorderLayout.CENTER);
@@ -104,4 +106,21 @@ public class GUIController {
         frame.setVisible(true);
     }
 
+    /**
+     * Resets the chess game to its initial state.
+     */
+    private void resetGame() {
+        turnCounter = 0;
+        try {
+            chessRound.resetBoard();
+        } catch (InputException ex) {
+            throw new RuntimeException(ex);
+        }
+        chessPanel.drawBoard();
+        moveInput.setText("");
+        error.setText("");
+        instructionLabel.setText("White to move:");
+        advantageLabel.setText("Advantage: 0");
+    }
 }
+
