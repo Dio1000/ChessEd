@@ -33,7 +33,7 @@ public class Pawn implements Piece {
     }
 
     @Override
-    public boolean isLegalMove(ChessRound chessRound, int currentRow, int currentCol, String move){
+    public boolean isLegalMove(ChessRound chessRound, int currentRow, int currentCol, String move) {
         Piece[][] pieces = chessRound.getPieces();
 
         int newRow = ChessUtils.getColRow(move).getValue2();
@@ -47,17 +47,19 @@ public class Pawn implements Piece {
         else if (this.colour == PieceColour.BLACK && newRow > currentRow) return false;
 
         // White pieces
-        if (this.colour == PieceColour.WHITE){
+        if (this.colour == PieceColour.WHITE) {
             // Case 1 - Move from row 1
-            if (currentRow == 1){
+            if (currentRow == 1) {
                 // Case 1.1 - Move forward 1 or 2 spaces
-                if (currentCol == newCol) return newRow <= 3;
+                if (currentCol == newCol) {
+                    return newRow <= 3 && Objects.equals(pieces[newRow][newCol].getName(), "None");
+                }
                 // Case 1.2 - Takes another piece
-                if (currentCol + 1 == newCol)
-                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation());
-                else if (currentCol - 1 == newCol)
-                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
-                else return false;
+                if (Math.abs(currentCol - newCol) == 1) {
+                    return newRow == currentRow + 1 &&
+                            ChessUtils.isValidNonEmptyPiece(pieces[newRow][newCol].getRepresentation());
+                }
+                return false;
             }
 
             // Case 2 - Move from another row
@@ -67,28 +69,26 @@ public class Pawn implements Piece {
             }
 
             // Case 2.2 - Takes another piece
-            if (currentRow + 1 == newRow){
-                if (currentCol + 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol + 1].getRepresentation())) {
-                    return true;
-                }
-                else {
-                    return currentCol - 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow + 1][currentCol - 1].getRepresentation());
-                }
+            if (Math.abs(currentCol - newCol) == 1) {
+                return newRow == currentRow + 1 &&
+                        ChessUtils.isValidNonEmptyPiece(pieces[newRow][newCol].getRepresentation());
             }
         }
 
         // Black pieces
-        if (this.colour == PieceColour.BLACK){
+        if (this.colour == PieceColour.BLACK) {
             // Case 1 - Move from row 6
-            if (currentRow == 6){
+            if (currentRow == 6) {
                 // Case 1.1 - Move forward 1 or 2 spaces
-                if (currentCol == newCol) return newRow >= 4;
+                if (currentCol == newCol) {
+                    return newRow >= 4 && Objects.equals(pieces[newRow][newCol].getName(), "None");
+                }
                 // Case 1.2 - Takes another piece
-                if (currentCol + 1 == newCol)
-                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol + 1].getRepresentation());
-                else if (currentCol - 1 == newCol)
-                    return ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol - 1].getRepresentation());
-                else return false;
+                if (Math.abs(currentCol - newCol) == 1) {
+                    return newRow == currentRow - 1 &&
+                            ChessUtils.isValidNonEmptyPiece(pieces[newRow][newCol].getRepresentation());
+                }
+                return false;
             }
 
             // Case 2 - Move from another row
@@ -98,14 +98,15 @@ public class Pawn implements Piece {
             }
 
             // Case 2.2 - Takes another piece
-            if (currentRow - 1 == newRow){
-                if (currentCol + 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol + 1].getRepresentation())) return true;
-                else return currentCol - 1 == newCol && ChessUtils.isValidNonEmptyPiece(pieces[currentRow - 1][currentCol - 1].getRepresentation());
+            if (Math.abs(currentCol - newCol) == 1) {
+                return newRow == currentRow - 1 &&
+                        ChessUtils.isValidNonEmptyPiece(pieces[newRow][newCol].getRepresentation());
             }
         }
-        
+
         return false;
     }
+
 
     @Override
     public String getDisplay() {

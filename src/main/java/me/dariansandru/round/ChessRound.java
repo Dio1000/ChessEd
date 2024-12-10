@@ -173,7 +173,7 @@ public class ChessRound implements GameRound{
                     pieces[currentRow][currentCol] = new EmptyPiece();
 
                     Piece takenPiece = pieces[row][col];
-                    pieces[row][col] = ChessUtils.getPiece(piece, pieceColour);
+                    pieces[row][col] = oldPiece;
 
                     if (isKingChecked(kingRow, kingCol, pieceColour)){
                         pieces[currentRow][currentCol] = oldPiece;
@@ -207,36 +207,17 @@ public class ChessRound implements GameRound{
         }
         else piece = "P";
 
-        AtomicBoolean OK = new AtomicBoolean(false);
-        var threadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        var latch = new CountDownLatch(8);
-
         for (int currentRow = 0 ; currentRow < 8 ; currentRow++){
-            int finalCurrentRow = currentRow;
-            threadPool.execute(() -> {
-                for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
-                    if (Objects.equals(pieces[finalCurrentRow][currentCol].getRepresentation(), piece)
-                            && pieces[finalCurrentRow][currentCol].getColour() == pieceColour
-                            && pieces[finalCurrentRow][currentCol].isLegalMove(this, finalCurrentRow, currentCol, move)
-                            && ChessValidator.validateObstruction(this, piece, finalCurrentRow, currentCol, row, col)){
-                        OK.set(true);
-                        latch.countDown();
-                        return;
-                    }
+            for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
+                if (Objects.equals(pieces[currentRow][currentCol].getRepresentation(), piece)
+                        && pieces[currentRow][currentCol].getColour() == pieceColour
+                        && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
+                        && ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
+                    return true;
                 }
-                latch.countDown();
-            });
+            }
         }
-
-        try{
-            latch.await();
-        }
-        catch (InterruptedException e){
-            throw new RuntimeException(e);
-        }
-        threadPool.shutdownNow();
-
-        return OK.get();
+        return false;
     }
 
     /**
@@ -287,7 +268,10 @@ public class ChessRound implements GameRound{
             for (int col = 0 ; col < 8 ; col++){
                 if (!Objects.equals(pieces[row][col].getName(), "None")){
                     String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + (kingRow + 1);
-                    if (checkMovePiece(move, oppositeColour)) return true;
+                    if (checkMovePiece(move, oppositeColour)) {
+                        System.out.println(oppositeColour + " " + move);
+                        return true;
+                    }
                 }
             }
         }
@@ -350,13 +334,13 @@ public class ChessRound implements GameRound{
         Set<String> validKingMoves = new HashSet<>();
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
-                int newRow = kingRow + j + 1;
+                int newRow = kingRow + j;
                 int newCol = kingCol + i;
                 if (newCol < 0 || newRow < 0 || newCol > 7 || newRow > 7) continue;
 
                 String move = "K" + ChessUtils.getLetter(newCol) + (newRow + 1);
 
-                if (checkMovePiece(move, pieceColour) && !isKingChecked(newCol, newRow, pieceColour)) validKingMoves.add(move);
+                if (checkMovePiece(move, pieceColour) && !isKingChecked(newRow, newCol, pieceColour)) validKingMoves.add(move);
             }
         }
 
@@ -428,10 +412,10 @@ public class ChessRound implements GameRound{
 
         boolean isKingCheckedFlag = isKingChecked(kingRow, kingCol, pieceColour);
         boolean canMoveFlag = canMoveOutOfCheck(pieceColour);
-        //boolean canBlockFlag = canBlockCheck(kingRow, kingCol, pieceColour);
+        boolean canBlockFlag = canBlockCheck(kingRow, kingCol, pieceColour);
         boolean canTakeFlag = canTakeAttacker(kingRow, kingCol, pieceColour);
 
-        return isKingCheckedFlag && !canMoveFlag && !canTakeFlag;
+        return isKingCheckedFlag && !canMoveFlag && !canTakeFlag && !canBlockFlag;
     }
 
     /**
@@ -476,5 +460,4 @@ public class ChessRound implements GameRound{
 
         return whitePiecesPlayerScore - blackPiecesPlayerScore;
     }
-
 }
