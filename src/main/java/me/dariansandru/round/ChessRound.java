@@ -150,8 +150,8 @@ public class ChessRound implements GameRound{
         int col = ChessUtils.getColRow(move).getValue1();
         int row = ChessUtils.getColRow(move).getValue2();
 
-        int kingRow = getKingLocation(this).getValue1();
-        int kingCol = getKingLocation(this).getValue2();
+        int kingRow = getKingLocation(this, pieceColour).getValue1();
+        int kingCol = getKingLocation(this, pieceColour).getValue2();
 
         if (col < 0 || row < 0) return false;
 
@@ -168,6 +168,7 @@ public class ChessRound implements GameRound{
                         && pieces[currentRow][currentCol].getColour() == pieceColour
                         && pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)
                         && ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col)){
+
                     Piece oldPiece = pieces[currentRow][currentCol];
                     pieces[currentRow][currentCol] = new EmptyPiece();
 
@@ -309,8 +310,13 @@ public class ChessRound implements GameRound{
         for (int row = 0 ; row < 8 ; row++){
             for (int col = 0 ; col < 8 ; col++){
                 if (!Objects.equals(pieces[row][col].getName(), "None")){
-                    String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + kingRow;
-                    if (checkMovePiece(move, oppositeColour)) return new Pair<>(row, col);
+                    if (Objects.equals(pieces[row][col].getName(), "None")) continue;
+
+                    String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + (kingRow + 1);
+                    // TODO: WARNING DANGEROUS
+                    if (checkMovePiece(move, oppositeColour) && pieces[row][col].isLegalMove(this, row, col, move)) {
+                        return new Pair<>(row, col);
+                    }
                 }
             }
         }
@@ -398,12 +404,12 @@ public class ChessRound implements GameRound{
     public boolean canTakeAttacker(int kingRow, int kingCol, PieceColour pieceColour) throws ValidatorException {
         int attackerRow = getKingAttackerLocation(kingRow, kingCol, pieceColour).getValue1();
         int attackerCol = getKingAttackerLocation(kingRow, kingCol, pieceColour).getValue2();
+        if (attackerRow < 0 || attackerCol < 0) return false;
 
         for (int row = 0 ; row < 8 ; row++){
             for (int col = 0 ; col < 8 ; col++){
                 Piece piece = pieces[row][col];
                 String move = piece.getRepresentation() + ChessUtils.getLetter(attackerCol) + (attackerRow + 1);
-
                 if (checkMovePiece(move, pieceColour)) return true;
             }
         }
@@ -417,16 +423,15 @@ public class ChessRound implements GameRound{
      * @throws ValidatorException Thrown if the validator fails.
      */
     public boolean isCheckmate(PieceColour pieceColour) throws ValidatorException {
-        int kingRow = ChessUtils.getKingLocation(this).getValue1();
-        int kingCol = ChessUtils.getKingLocation(this).getValue2();
+        int kingRow = ChessUtils.getKingLocation(this, pieceColour).getValue1();
+        int kingCol = ChessUtils.getKingLocation(this, pieceColour).getValue2();
 
         boolean isKingCheckedFlag = isKingChecked(kingRow, kingCol, pieceColour);
         boolean canMoveFlag = canMoveOutOfCheck(pieceColour);
-        boolean canBlockFlag = canBlockCheck(kingRow, kingCol, pieceColour);
+        //boolean canBlockFlag = canBlockCheck(kingRow, kingCol, pieceColour);
         boolean canTakeFlag = canTakeAttacker(kingRow, kingCol, pieceColour);
 
-        System.out.println(isKingCheckedFlag + " " + canMoveFlag + " " + canBlockFlag + " " + canTakeFlag);
-        return isKingCheckedFlag && !canMoveFlag && !canBlockFlag && !canTakeFlag;
+        return isKingCheckedFlag && !canMoveFlag && !canTakeFlag;
     }
 
     /**
@@ -434,7 +439,10 @@ public class ChessRound implements GameRound{
      * @return True if the game is in checkmate, false otherwise.
      */
     public boolean isCheckmate() throws ValidatorException, InputException {
-        return isCheckmate(PieceColour.WHITE) || isCheckmate(PieceColour.BLACK);
+        boolean whiteCheckMateFlag = isCheckmate(PieceColour.WHITE);
+        boolean blackCheckMateFlag = isCheckmate(PieceColour.BLACK);
+
+        return (whiteCheckMateFlag || blackCheckMateFlag);
     }
 
     /**

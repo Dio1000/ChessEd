@@ -106,6 +106,9 @@ public abstract class ChessValidator {
     private static boolean validateDiagonalMove(ChessRound chessRound, int currentRow, int currentCol, int newRow, int newCol){
         Piece[][] pieces = chessRound.getPieces();
 
+        boolean diagonalMove = Math.abs(newRow - currentRow) == Math.abs(newCol - currentCol);
+        if (!diagonalMove) return false;
+
         // Case 1 - Up-right
         if (newRow > currentRow && newCol > currentCol){
             currentRow++;
