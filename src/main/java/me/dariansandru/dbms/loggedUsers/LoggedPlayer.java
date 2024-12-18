@@ -1,22 +1,16 @@
 package me.dariansandru.dbms.loggedUsers;
 
 import me.dariansandru.domain.Player;
+import me.dariansandru.utilities.observer.Observable;
 
 public class LoggedPlayer {
 
-    private static Player loggedPlayer;
+    private static final Observable<Player> loggedPlayer = new Observable<>();
 
     private LoggedPlayer() {}
 
-    public static Player getLoggedPlayer() {
+    public static Observable<Player> getLoggedPlayer() {
         return loggedPlayer;
     }
 
-    public static void setLoggedPlayer(Player player) {
-        loggedPlayer = player;
-    }
-
-    public static void resetLoggedPlayer() {
-        loggedPlayer = null;
-    }
 }

@@ -41,19 +41,19 @@ public class NavigationController {
     public static void navigateTo(JFrame newFrame) {
         setCurrentFrame(newFrame);
         newFrame.setVisible(true);
+        newFrame.repaint();
     }
 
     public static void navigateToMainPage() {
         if (mainPageGUI != null) {
             navigateTo(mainPageGUI.getFrame());
-            mainPageGUI.updateLoggedPlayer();
         }
     }
 
     public static void navigateToAdminMainPage() {
         if (adminMainPageGUI != null) {
-            navigateTo(adminMainPageGUI.getFrame());
             adminMainPageGUI.updateLoggedAdmin();
+            navigateTo(adminMainPageGUI.getFrame());
         }
     }
 }

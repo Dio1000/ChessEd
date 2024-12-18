@@ -28,10 +28,9 @@ public class MainPageGUIController {
 
     public void run() {
         mainPageGUI.drawGUI();
-        mainPageGUI.updateLoggedPlayer();
 
         mainPageGUI.setLoginButtonAction(e -> {
-            if (LoggedPlayer.getLoggedPlayer() != null) {
+            if (mainPageGUI.getLoggedPlayer().getReference() != null) {
                 JOptionPane.showMessageDialog(null, "You are already logged in!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
@@ -40,7 +39,7 @@ public class MainPageGUIController {
         });
 
         mainPageGUI.setRegisterButtonAction(e -> {
-            if (LoggedPlayer.getLoggedPlayer() != null) {
+            if (mainPageGUI.getLoggedPlayer().getReference() != null) {
                 JOptionPane.showMessageDialog(null, "You are already logged in!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }

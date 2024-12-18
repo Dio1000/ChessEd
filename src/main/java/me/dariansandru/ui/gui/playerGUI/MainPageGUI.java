@@ -2,6 +2,8 @@ package me.dariansandru.ui.gui.playerGUI;
 
 import me.dariansandru.dbms.loggedUsers.LoggedPlayer;
 import me.dariansandru.domain.Player;
+import me.dariansandru.utilities.observer.Observable;
+import me.dariansandru.utilities.observer.Observer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,23 +18,22 @@ public class MainPageGUI extends JFrame{
     private JButton playButton;
     private JLabel messageLabel;
 
-    private Player loggedPlayer = LoggedPlayer.getLoggedPlayer();
+    private final Observer<Player> loggedPlayer = new Observer<>();
+
+    public Observer<Player> getLoggedPlayer() {
+        return loggedPlayer;
+    }
 
     public JFrame getFrame() {
         return frame;
     }
 
-    public Player getPlayer(){
-        return loggedPlayer;
-    }
-
-    public void setPlayer(Player newPlayer){
-        loggedPlayer = newPlayer;
-    }
-
-    public void updateLoggedPlayer(){
-        if (loggedPlayer == null) messageLabel.setText("You are not logged in!");
-        else messageLabel.setText("Welcome " + loggedPlayer.getUsername());
+    public MainPageGUI() {
+        LoggedPlayer.getLoggedPlayer().addObserver(loggedPlayer);
+        loggedPlayer.addChangeListener(newPlayer -> {
+            if (newPlayer == null) messageLabel.setText("You are not logged in!");
+            else messageLabel.setText("Welcome " + newPlayer.getUsername());
+        });
     }
 
     public void drawGUI() {
@@ -46,7 +47,6 @@ public class MainPageGUI extends JFrame{
         frame.add(placeholderLabel, BorderLayout.NORTH);
 
         if (messageLabel == null) messageLabel = new JLabel("You are not logged in!", SwingConstants.CENTER);
-        updateLoggedPlayer();
 
         messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         frame.add(messageLabel, BorderLayout.CENTER);

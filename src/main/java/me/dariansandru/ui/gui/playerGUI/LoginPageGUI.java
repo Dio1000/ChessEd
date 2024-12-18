@@ -4,6 +4,7 @@ import me.dariansandru.dbms.DBQuery;
 import me.dariansandru.dbms.loggedUsers.LoggedPlayer;
 import me.dariansandru.domain.Player;
 import me.dariansandru.ui.guiController.NavigationController;
+import me.dariansandru.utilities.observer.Observable;
 
 import javax.swing.*;
 import java.awt.*;
@@ -70,6 +71,8 @@ public class LoginPageGUI {
     }
 
     private void loginValidation() {
+        Player loggedPlayer = new Player();
+
         String username = usernameField.getText();
         String password = String.valueOf(passwordField.getPassword());
 
@@ -95,12 +98,11 @@ public class LoginPageGUI {
             return;
         }
 
-        Player loggedPlayer = new Player();
         List<String> loggedPlayerData = DBQuery.getDataByUsername(username);
         DBQuery.setPlayerData(loggedPlayer, loggedPlayerData);
 
         JOptionPane.showMessageDialog(null, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        LoggedPlayer.setLoggedPlayer(loggedPlayer);
+        LoggedPlayer.getLoggedPlayer().notifyObservers(loggedPlayer);
 
         NavigationController.navigateToMainPage();
     }

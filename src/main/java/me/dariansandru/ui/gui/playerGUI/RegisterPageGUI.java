@@ -1,9 +1,14 @@
 package me.dariansandru.ui.gui.playerGUI;
 
+import me.dariansandru.dbms.DBQuery;
 import me.dariansandru.dbms.DBUpdater;
+import me.dariansandru.dbms.loggedUsers.LoggedPlayer;
+import me.dariansandru.domain.Player;
+import me.dariansandru.utilities.observer.Observer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class RegisterPageGUI {
 
@@ -131,7 +136,13 @@ public class RegisterPageGUI {
         }
 
         DBUpdater.insertPlayer(username, email, password, 1000);
+        Player loggedPlayer = new Player();
+        List<String> loggedPlayerData = DBQuery.getDataByUsername(username);
+        DBQuery.setPlayerData(loggedPlayer, loggedPlayerData);
+
         JOptionPane.showMessageDialog(null, "Register successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        LoggedPlayer.getLoggedPlayer().notifyObservers(loggedPlayer);
+
         frame.dispose();
     }
 

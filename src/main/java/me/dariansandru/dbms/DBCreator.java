@@ -26,7 +26,7 @@ public abstract class DBCreator {
             System.out.println("Tables truncated successfully!.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -48,7 +48,7 @@ public abstract class DBCreator {
             System.out.println("Table 'players' created successfully.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -68,9 +68,8 @@ public abstract class DBCreator {
             System.out.println("Table 'admins' created successfully.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
     }
 
     private static void createAdminPermissionsTable() {
@@ -89,7 +88,7 @@ public abstract class DBCreator {
             System.out.println("Table 'AdminPermissions' created successfully.");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
