@@ -3,12 +3,44 @@ package me.dariansandru.domain;
 public class Player implements Comparable<Player> {
 
     private String username;
+    private String email;
+    private String password;
+
+    private int rating;
     private int wins;
     private int losses;
     private float winLossRatio;
 
     public Player(){
         setWinLossRatio();
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setWinLossRatio(float winLossRatio) {
+        this.winLossRatio = winLossRatio;
     }
 
     public String getUsername() {

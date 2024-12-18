@@ -25,15 +25,16 @@ public class ChessEngine {
     }
 
     private int evaluateMaterial(PieceColour colour) {
+        int weight = 7;
         int playerMaterialAdvantage = ChessUtils.getColourMaterialAdvantage(chessRound, colour);
-        return (colour == PieceColour.WHITE) ? playerMaterialAdvantage : -playerMaterialAdvantage;
+        return (colour == PieceColour.WHITE) ? playerMaterialAdvantage * weight : -playerMaterialAdvantage * weight;
     }
 
     private int evaluateAvailableCaptures(PieceColour colour) {
         int totalPlayer = 0;
         int totalOpponent = 0;
         int total;
-        int weight = 3;
+        int weight = 2;
 
         for (int row = 0 ; row < 8 ; row++){
             for (int col = 0 ; col < 8 ; col++){
@@ -48,14 +49,11 @@ public class ChessEngine {
         return (colour == PieceColour.WHITE) ? total * weight : -total * weight;
     }
 
-    private int evaluateKingSafety(PieceColour colour) throws ValidatorException, InputException {
-        if (chessEngineUtils.isKingAttacked(colour) && colour == PieceColour.WHITE) return -10000;
-        else if (chessEngineUtils.isKingAttacked(colour) && colour == PieceColour.BLACK) return 10000;
-
+    private int evaluateKingSafety(PieceColour colour) {
         int safetyScore = 0;
         int kingRow = chessEngineUtils.getKingLocation(colour).getValue1();
         int kingCol = chessEngineUtils.getKingLocation(colour).getValue2();
-        int weight = 2;
+        int weight = 5;
 
         if (chessEngineUtils.isOpenFile(kingCol)) safetyScore += 4 * weight;
         if (kingRow > 0 && chessEngineUtils.isOpenFile(kingRow - 1)) safetyScore += 2 * weight;
@@ -66,6 +64,7 @@ public class ChessEngine {
 
     private int evaluatePieceActivity(PieceColour colour) {
         int score = 0;
+        int weight = 2;
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
@@ -73,10 +72,10 @@ public class ChessEngine {
 
                 if (piece.getColour() == colour) {
                     if ((row == 3 || row == 4) && (col == 3 || col == 4)) {
-                        score += 5;
+                        score += 5 * weight;
                     }
                     if (piece.getName().equals("Rook") && chessEngineUtils.isOpenFile(col)) {
-                        score += 10;
+                        score += 10 * weight;
                     }
                 }
             }
@@ -87,6 +86,7 @@ public class ChessEngine {
 
     private int evaluatePawnStructure(PieceColour colour) {
         int penalty = 0;
+        int weight = 2;
 
         for (int col = 0; col < 8; col++) {
             boolean foundPawn = false;
@@ -113,11 +113,12 @@ public class ChessEngine {
                 penalty += 15;
             }
         }
-        return (colour == PieceColour.WHITE) ? -penalty : penalty;
+        return (colour == PieceColour.WHITE) ? -penalty * weight : penalty * weight;
     }
 
     private int evaluateMobility(PieceColour colour) {
         int totalMoves = 0;
+        int weight = 3;
 
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
@@ -127,7 +128,6 @@ public class ChessEngine {
                 }
             }
         }
-        int weight = 1;
         return (colour == PieceColour.WHITE) ? totalMoves * weight : -totalMoves * weight;
     }
 
