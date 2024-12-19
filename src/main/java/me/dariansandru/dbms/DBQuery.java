@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DBQuery {
-    public static void fetchPlayers() {
+    public static List<Player> fetchPlayers() {
         String querySQL = "SELECT * FROM players";
+        List<Player> players = new ArrayList<>();
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(querySQL);
@@ -24,13 +25,23 @@ public class DBQuery {
                 String email = resultSet.getString("email");
                 int rating = resultSet.getInt("rating");
 
-                System.out.printf("Player ID: %d, Username: %s, Email: %s, Rating: %d%n",
-                        playerId, username, email, rating);
+                List<String> data = new ArrayList<>();
+
+                data.add(String.valueOf(playerId));
+                data.add(username);
+                data.add(email);
+                data.add(String.valueOf(rating));
+
+                Player player = new Player();
+                DBQuery.setPlayerData(player, data);
+                players.add(player);
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
+
+        return players;
     }
 
     public static List<String> getDataByUsername(String _username) {
@@ -59,7 +70,7 @@ public class DBQuery {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return resultList;
@@ -89,12 +100,33 @@ public class DBQuery {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return resultList;
     }
 
+    public static boolean playerExists(String _username) {
+        String querySQL = "SELECT * FROM players WHERE username = ?";
+
+        try(Connection connection = DBConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(querySQL)
+                ){
+
+            preparedStatement.setString(1, _username);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+            return false;
+
+        }catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        return false;
+    }
 
     public static void setPlayerData(Player loggedPlayer, List<String> loggedPlayerData){
         loggedPlayer.setUsername(loggedPlayerData.get(1));
@@ -122,7 +154,7 @@ public class DBQuery {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return resultList;
@@ -141,9 +173,28 @@ public class DBQuery {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         return resultList;
+    }
+
+    public static boolean hasPermission(String adminUsername, String permission){
+        String querySQL = "SELECT COUNT(?) FROM admins WHERE username = ?";
+
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(querySQL);
+            ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            preparedStatement.setString(1, permission);
+            preparedStatement.setString(2, adminUsername);
+
+            return resultSet.next();
+
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+
+        return false;
     }
 }

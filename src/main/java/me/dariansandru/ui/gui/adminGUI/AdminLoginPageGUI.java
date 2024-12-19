@@ -100,8 +100,9 @@ public class AdminLoginPageGUI {
         DBQuery.setAdminData(loggedAdmin, loggedAdminData);
 
         JOptionPane.showMessageDialog(null, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        LoggedAdmin.setLoggedAdmin(loggedAdmin);
+        LoggedAdmin.getLoggedAdmin().notifyObservers(loggedAdmin);
 
         NavigationController.navigateToAdminMainPage();
+        this.frame.dispose();
     }
 }

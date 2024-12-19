@@ -2,6 +2,9 @@ package me.dariansandru.ui.gui.adminGUI;
 
 import me.dariansandru.dbms.DBQuery;
 import me.dariansandru.dbms.DBUpdater;
+import me.dariansandru.dbms.loggedUsers.LoggedAdmin;
+import me.dariansandru.domain.Admin;
+import me.dariansandru.ui.guiController.NavigationController;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,7 +91,7 @@ public class AdminRegisterPageGUI {
         JButton backButton = new JButton("Back");
 
         registerButton.addActionListener(e -> registerValidation());
-        backButton.addActionListener(e -> frame.dispose());
+        backButton.addActionListener(e -> NavigationController.navigateToAdminMainPage());
 
         buttonPanel.add(registerButton);
         buttonPanel.add(backButton);
@@ -154,7 +157,13 @@ public class AdminRegisterPageGUI {
         DBUpdater.insertAdmin(username, email, password, permissions);
         DBUpdater.insertPermissions(Integer.parseInt(DBQuery.getAdminDataByUsername(username).get(0)), permissions);
         JOptionPane.showMessageDialog(null, "Admin Register successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        frame.dispose();
+
+        Admin loggedAdmin = new Admin();
+        List<String> loggedAdminData = DBQuery.getAdminDataByUsername(username);
+        DBQuery.setAdminData(loggedAdmin, loggedAdminData);
+
+        LoggedAdmin.getLoggedAdmin().notifyObservers(loggedAdmin);
+        NavigationController.navigateToAdminMainPage();
     }
 
     private void resetTextFields() {

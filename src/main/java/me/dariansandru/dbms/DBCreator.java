@@ -10,6 +10,7 @@ public abstract class DBCreator {
         createPlayersTable();
         createAdminsTable();
         createAdminPermissionsTable();
+        createReportsTable();
     }
 
     public static void truncateTables(){
@@ -92,5 +93,22 @@ public abstract class DBCreator {
         }
     }
 
+    private static void createReportsTable() {
+        String createTableSQL = """
+                CREATE TABLE IF NOT EXISTS reports (
+                report_id INT AUTO_INCREMENT PRIMARY KEY,
+                report_text VARCHAR(255) NOT NULL,
+                admin_id INT NOT NULL,
+                player_id INT NOT NULL);""";
 
+        try (Connection connection = DBConnection.getConnection();
+            Statement statement = connection.createStatement()){
+
+            statement.execute(createTableSQL);
+            System.out.println("Table 'reports' created successfully.");
+
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
 }

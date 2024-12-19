@@ -23,10 +23,28 @@ public class DBUpdater {
             preparedStatement.setInt(4, rating);
 
             preparedStatement.executeUpdate();
+
         } catch (SQLException e) {
             System.err.println("SQL Error: " + e.getMessage());
-            e.printStackTrace();
         }
+    }
+
+    public static void updateRating(String username, int newRating) {
+        String updateSQL = "UPDATE players SET rating = ? WHERE username = ?;";
+
+        try(
+            Connection connection = DBConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(updateSQL);){
+
+            preparedStatement.setInt(1, newRating);
+            preparedStatement.setString(2, username);
+            preparedStatement.executeUpdate();
+
+        } catch(SQLException e){
+            System.err.println(e.getMessage());
+        }
+
+
     }
 
     public static void insertAdmin(String username, String email, String password, List<String> permissions) {
@@ -45,7 +63,6 @@ public class DBUpdater {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             System.err.println("SQL Error: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -69,6 +86,24 @@ public class DBUpdater {
                 System.err.println("SQL Error: " + e.getMessage());
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static void insertReport(int admin_id, int player_id, String report){
+        if (report.isEmpty()) return;
+
+        String insertSQL = "INSERT INTO reports (report, admin_id, player_id)" +
+                "VALUES (?, ?, ?);";
+
+        try (Connection connection = DBConnection.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(insertSQL);
+            ){
+            preparedStatement.setString(1, report);
+            preparedStatement.setInt(2, admin_id);
+            preparedStatement.setInt(3, player_id);
+
+        }catch (SQLException e){
+            System.err.println("SQL Error: " + e.getMessage());
         }
     }
 

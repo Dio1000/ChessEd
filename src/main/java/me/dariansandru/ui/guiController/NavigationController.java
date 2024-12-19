@@ -1,8 +1,10 @@
 package me.dariansandru.ui.guiController;
 
 import me.dariansandru.ui.gui.adminGUI.AdminMainPageGUI;
+import me.dariansandru.ui.gui.adminGUI.AdminOrganiserPageGUI;
 import me.dariansandru.ui.gui.playerGUI.MainPageGUI;
 import me.dariansandru.ui.guiController.adminGUIController.AdminMainPageGUIController;
+import me.dariansandru.ui.guiController.adminGUIController.AdminOrganiserPageGUIController;
 import me.dariansandru.ui.guiController.playerGUIController.MainPageGUIController;
 
 import javax.swing.*;
@@ -39,6 +41,9 @@ public class NavigationController {
     }
 
     public static void navigateTo(JFrame newFrame) {
+        if (newFrame instanceof AdminMainPageGUI){
+
+        }
         setCurrentFrame(newFrame);
         newFrame.setVisible(true);
         newFrame.repaint();
@@ -52,8 +57,12 @@ public class NavigationController {
 
     public static void navigateToAdminMainPage() {
         if (adminMainPageGUI != null) {
-            adminMainPageGUI.updateLoggedAdmin();
             navigateTo(adminMainPageGUI.getFrame());
         }
+    }
+
+    public static void navigateToAdminOrganiserPage(AdminOrganiserPageGUIController adminOrganiserPageGUIController) {
+        navigateTo(adminOrganiserPageGUIController.getAdminOrganiserPageGUI());
+        adminOrganiserPageGUIController.run();
     }
 }

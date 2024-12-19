@@ -32,7 +32,7 @@ public class MainPageGUI extends JFrame{
         LoggedPlayer.getLoggedPlayer().addObserver(loggedPlayer);
         loggedPlayer.addChangeListener(newPlayer -> {
             if (newPlayer == null) messageLabel.setText("You are not logged in!");
-            else messageLabel.setText("Welcome " + newPlayer.getUsername());
+            else messageLabel.setText("Welcome " + newPlayer.getUsername() + "!");
         });
     }
 

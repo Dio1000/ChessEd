@@ -1,6 +1,8 @@
 package me.dariansandru.ui.gui.adminGUI;
 
+import me.dariansandru.dbms.loggedUsers.LoggedAdmin;
 import me.dariansandru.domain.Admin;
+import me.dariansandru.utilities.observer.Observer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,28 +12,29 @@ public class AdminMainPageGUI extends JFrame {
 
     private final JFrame frame = new JFrame("Admin Main Page");
 
-    private final JButton controllerButton = new JButton("Controller");
+    private final JButton organiseButton = new JButton("Organise");
     private final JButton loginButton = new JButton("Login");
     private final JButton registerButton = new JButton("Register");
     private final JButton exitButton = new JButton("Exit");
 
-    private JLabel loggedAdminLabel = new JLabel("Login", SwingConstants.CENTER);
+    private final JLabel loggedAdminLabel = new JLabel("You are not logged in yet!", SwingConstants.CENTER);
 
-    private Admin loggedAdmin = null;
+    private final Observer<Admin> loggedAdmin = new Observer<>();
+
+    public AdminMainPageGUI() {
+        LoggedAdmin.getLoggedAdmin().addObserver(loggedAdmin);
+        loggedAdmin.addChangeListener(newAdmin -> {
+            if (newAdmin == null) loggedAdminLabel.setText("You are not logged in yet!");
+            else loggedAdminLabel.setText("Welcome " + newAdmin.getUsername() + "!");
+        });
+    }
+
+    public Observer<Admin> getLoggedAdmin() {
+        return loggedAdmin;
+    }
 
     public JFrame getFrame() {
         return frame;
-    }
-
-    public void setAdmin(Admin admin) {
-        loggedAdmin = admin;
-    }
-
-    public void updateLoggedAdmin() {
-        if (loggedAdmin == null)
-            loggedAdminLabel.setText("You are not logged in yet!");
-        else
-            loggedAdminLabel.setText("Welcome " + loggedAdmin.getUsername());
     }
 
     public void drawGUI() {
@@ -44,8 +47,6 @@ public class AdminMainPageGUI extends JFrame {
         placeholderLabel.setForeground(Color.BLUE);
         frame.add(placeholderLabel, BorderLayout.NORTH);
 
-        updateLoggedAdmin();
-
         loggedAdminLabel.setFont(new Font("Arial", Font.PLAIN, 16));
         loggedAdminLabel.setForeground(Color.DARK_GRAY);
         frame.add(loggedAdminLabel, BorderLayout.CENTER);
@@ -54,13 +55,13 @@ public class AdminMainPageGUI extends JFrame {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        styleButton(controllerButton);
+        styleButton(organiseButton);
         styleButton(loginButton);
         styleButton(registerButton);
         styleButton(exitButton);
 
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        buttonPanel.add(controllerButton);
+        buttonPanel.add(organiseButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(loginButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -88,8 +89,8 @@ public class AdminMainPageGUI extends JFrame {
         registerButton.addActionListener(action);
     }
 
-    public void setControllerButton(ActionListener action) {
-        controllerButton.addActionListener(action);
+    public void setOrganiseButton(ActionListener action) {
+        organiseButton.addActionListener(action);
     }
 
     public void setExitButtonAction(ActionListener action) {

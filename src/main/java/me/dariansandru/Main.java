@@ -2,7 +2,6 @@ package me.dariansandru;
 
 import me.dariansandru.controller.ChessController;
 import me.dariansandru.dbms.DBCreator;
-import me.dariansandru.dbms.DBUpdater;
 import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
@@ -83,9 +82,7 @@ public class Main {
                 chessConsoleUI.showResumedGame();
                 chessConsoleUI.show();
             }
-            case "trunc" -> {
-                DBCreator.truncateTables();
-            }
+            case "trunc" -> DBCreator.truncateTables();
             case "rules" -> Manual.showRules(outputDevice);
             default -> throw new IllegalStateException("Could not find command: " + args[0]);
         }
