@@ -36,6 +36,18 @@ public class ChessRound implements GameRound{
         resetBoard();
     }
 
+    public Player getWhitePiecesPlayer() {
+        return whitePiecesPlayer;
+    }
+
+    public Player getBlackPiecesPlayer() {
+        return blackPiecesPlayer;
+    }
+
+    public ChessEngine getChessEngine() {
+        return chessEngine;
+    }
+
     /**
      * Resets the board of the Chess round.
      * @throws InputException Thrown when input validation fails.
@@ -231,10 +243,8 @@ public class ChessRound implements GameRound{
         for (int currentRow = 0 ; currentRow < 8 ; currentRow++){
             for (int currentCol = 0 ; currentCol < 8 ; currentCol++){
                 if (!isMovePlayable(currentRow, currentCol, row, col, piece, pieceColour, move)) continue;
-                //System.out.println("Playable... " + piece + "->" + move);
                 if (canKingBeCaptured(currentRow, currentCol, row, col, pieceColour)) continue;
 
-                //System.out.println("Move " + move + " is king-safe, updating board in-memory...");
                 pieces[row][col] = pieces[currentRow][currentCol];
                 pieces[currentRow][currentCol] = new EmptyPiece();
                 return true;
@@ -330,7 +340,6 @@ public class ChessRound implements GameRound{
     public boolean isKingChecked(int kingRow, int kingCol, PieceColour pieceColour) 
             throws ValidatorException, InputException {
         PieceColour oppositeColour = (pieceColour == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
-        if (kingCol < 0 || kingRow < 0) return false;   // TODO: probably remove this
 
         for (int row = 0 ; row < 8 ; row++){
             for (int col = 0 ; col < 8 ; col++){
@@ -368,7 +377,6 @@ public class ChessRound implements GameRound{
      * @param pieceColour Colour of the piece.
      * @return Pair with row as value1, column as value2, or -1 for both is move is invalid.
      * @throws ValidatorException Thrown if input validation fails.
-     * @throws me.dariansandru.io.exception.InputException
      */
     public Pair<Integer, Integer> getKingAttackerLocation(int kingRow, int kingCol, PieceColour pieceColour) 
             throws ValidatorException, InputException {
@@ -381,7 +389,6 @@ public class ChessRound implements GameRound{
                     if (Objects.equals(pieces[row][col].getName(), "None")) continue;
 
                     String move = pieces[row][col].getRepresentation() + getLetter(kingCol) + (kingRow + 1);
-                    // TODO: why dangerous? looks ok
                     if (checkMovePiece(move, oppositeColour) 
                             && pieces[row][col].isLegalMove(this, row, col, move)) {
                         return new Pair<>(row, col);
@@ -424,7 +431,6 @@ public class ChessRound implements GameRound{
                 if (newCol < 0 || newRow < 0 || newCol > 7 || newRow > 7) continue;
 
                 String move = "K" + ChessUtils.getLetter(newCol) + (newRow + 1);
-                System.out.println(move + " " + checkMovePiece(move, pieceColour));
                 if (checkMovePiece(move, pieceColour) && 
                         !isKingChecked(newRow, newCol, pieceColour)) validKingMoves.add(move);
             }
@@ -438,7 +444,6 @@ public class ChessRound implements GameRound{
      * @param pieceColour Colour of the king.
      * @return True if the king can move out of check, false otherwise.
      * @throws ValidatorException Thrown if validation fails.
-     * @throws me.dariansandru.io.exception.InputException
      */
     public boolean canMoveOutOfCheck(PieceColour pieceColour) throws ValidatorException, InputException {
         Set<String> kingValidMoves = getKingValidMoves(this, pieceColour);
@@ -494,7 +499,6 @@ public class ChessRound implements GameRound{
      * @param pieceColour Colour of the king that is being checkmated.
      * @return True if the king is checkmated, false otherwise.
      * @throws ValidatorException Thrown if the validator fails.
-     * @throws me.dariansandru.io.exception.InputException
      */
     public boolean isCheckmate(PieceColour pieceColour) throws ValidatorException, InputException {
         int kingRow = ChessUtils.getKingLocation(this, pieceColour).getValue1();
@@ -505,15 +509,12 @@ public class ChessRound implements GameRound{
         boolean canBlockFlag = canBlockCheck(kingRow, kingCol, pieceColour);
         boolean canTakeFlag = canTakeAttacker(kingRow, kingCol, pieceColour);
 
-        System.out.println(isKingCheckedFlag + "  " + canMoveFlag);
         return isKingCheckedFlag && !canMoveFlag && !canTakeFlag && !canBlockFlag;
     }
 
     /**
      * Checks if a game ended in checkmate by checking if either king is checkmated.
      * @return True if the game is in checkmate, false otherwise.
-     * @throws me.dariansandru.domain.validator.exception.ValidatorException
-     * @throws me.dariansandru.io.exception.InputException
      */
     public boolean isCheckmate() throws ValidatorException, InputException {
         boolean whiteCheckMateFlag = isCheckmate(PieceColour.WHITE);
@@ -536,8 +537,6 @@ public class ChessRound implements GameRound{
     /**
      * Checks if a game ended in stalemate.
      * @return True if the game is in stalemate, false otherwise.
-     * @throws me.dariansandru.domain.validator.exception.ValidatorException
-     * @throws me.dariansandru.io.exception.InputException
      */
     public boolean isStalemate() throws ValidatorException, InputException {
         return isStalemate(PieceColour.WHITE) || isStalemate(PieceColour.BLACK);

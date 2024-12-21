@@ -8,6 +8,7 @@ import me.dariansandru.utilities.ChessUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.util.Objects;
 
 import static me.dariansandru.utilities.ChessUtils.getColRow;
@@ -17,15 +18,17 @@ import me.dariansandru.utilities.Pair;
  * Using this class allows the user to use a custom-made GUI for a Chess game.
  */
 public class ChessGUI extends JPanel {
-    
+
     private Piece[][] pieces;
     private final ChessRound chessRound;
     private Point selectedSquare;
+    private JFrame parentFrame;
 
-    public ChessGUI(ChessRound chessRound) {
+    public ChessGUI(ChessRound chessRound, JFrame parentFrame) {
         this.chessRound = chessRound;
+        this.parentFrame = parentFrame;
         this.pieces = chessRound.getPieces();
-        this.setLayout(new GridLayout(8, 8));
+        this.setLayout(new BorderLayout());
         drawBoard();
     }
 
@@ -50,6 +53,18 @@ public class ChessGUI extends JPanel {
      */
     public void drawBoard() {
         this.removeAll();
+
+        // Add the top panel for the back button
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BorderLayout());
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(e -> handleBackButton());
+        topPanel.add(backButton, BorderLayout.WEST);
+        this.add(topPanel, BorderLayout.NORTH);
+
+        // Create the chessboard
+        JPanel boardPanel = new JPanel();
+        boardPanel.setLayout(new GridLayout(8, 8));
         pieces = chessRound.getPieces();
 
         for (int row = 7; row >= 0; row--) {
@@ -67,9 +82,11 @@ public class ChessGUI extends JPanel {
                 if (scaledImage != null) {
                     square.setIcon(new ImageIcon(scaledImage));
                 }
-                this.add(square);
+                boardPanel.add(square);
             }
         }
+
+        this.add(boardPanel, BorderLayout.CENTER);
 
         this.revalidate();
         this.repaint();
@@ -98,15 +115,15 @@ public class ChessGUI extends JPanel {
 
             int startSquareIndex = (7 - startRow) * 8 + startCol;
             int destinationSquareIndex = (7 - destinationRow) * 8 + destinationCol;
-            
+
             System.out.println(startRow + " " + startCol);
             System.out.println(destinationCol + " " + destinationRow);
             System.out.println(startSquareIndex + " " + destinationSquareIndex);
 
-            JLabel startSquare = (JLabel) this.getComponent(startSquareIndex);
+            JLabel startSquare = (JLabel) this.getComponent(startSquareIndex + 1); // +1 for top panel
             startSquare.setIcon(null);
 
-            JLabel destinationSquare = (JLabel) this.getComponent(destinationSquareIndex);
+            JLabel destinationSquare = (JLabel) this.getComponent(destinationSquareIndex + 1); // +1 for top panel
             Image scaledImage = getImageFromPiece(pieceToMove);
             if (scaledImage != null) {
                 destinationSquare.setIcon(new ImageIcon(scaledImage));
@@ -114,9 +131,15 @@ public class ChessGUI extends JPanel {
 
             this.revalidate();
             this.repaint();
-            
+
         } catch (Exception ex) {
             System.err.println("Error updating board: " + ex.getMessage());
+        }
+    }
+
+    private void handleBackButton() {
+        if (parentFrame != null) {
+            parentFrame.dispose();
         }
     }
 }

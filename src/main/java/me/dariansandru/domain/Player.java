@@ -12,7 +12,7 @@ public class Player implements Comparable<Player> {
     private float winLossRatio;
 
     public Player(){
-        setWinLossRatio();
+
     }
 
     public String getEmail() {
@@ -27,16 +27,16 @@ public class Player implements Comparable<Player> {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public int getRating() {
         return rating;
     }
 
     public void setRating(int rating) {
         this.rating = rating;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public void setWinLossRatio(float winLossRatio) {
@@ -72,8 +72,11 @@ public class Player implements Comparable<Player> {
     }
 
     public void setWinLossRatio() {
-        if (this.wins + this.losses == 0) this.winLossRatio = 0;
-        else this.winLossRatio = (float) ((100 * wins) / (wins + losses));
+        if (this.wins + this.losses == 0) {
+            this.winLossRatio = 0;
+        } else {
+            this.winLossRatio = ((float) this.wins / (this.wins + this.losses)) * 100.0f;
+        }
     }
 
     @Override

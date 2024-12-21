@@ -59,7 +59,10 @@ public class ChessController implements GameController {
         }
 
         String errorMaybe = chessRound.handleMove(move, colour);
-        if (errorMaybe == null) turn++;
+        if (errorMaybe == null){
+            turn++;
+            turns.add(move);
+        }
         return errorMaybe;
     }
 

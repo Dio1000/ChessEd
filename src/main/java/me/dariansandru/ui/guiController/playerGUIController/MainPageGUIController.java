@@ -48,6 +48,11 @@ public class MainPageGUIController {
         });
 
         mainPageGUI.setPlayButtonAction(e -> {
+            if (mainPageGUI.getLoggedPlayer().getReference() == null) {
+                JOptionPane.showMessageDialog(null, "You are not logged in!", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             InputDevice inputDevice = new InputDevice();
             OutputDevice outputDevice = new OutputDevice();
 
@@ -60,6 +65,7 @@ public class MainPageGUIController {
             } catch (InputException ex) {
                 throw new RuntimeException(ex);
             }
+
             ChessConsoleUI chessConsoleUI = new ChessConsoleUI(inputDevice, outputDevice, chessController);
             ChessGUIController guiController = new ChessGUIController(chessConsoleUI);
             guiController.run();

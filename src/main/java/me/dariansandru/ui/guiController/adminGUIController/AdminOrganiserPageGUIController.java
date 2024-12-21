@@ -2,10 +2,8 @@ package me.dariansandru.ui.guiController.adminGUIController;
 
 import me.dariansandru.dbms.DBQuery;
 import me.dariansandru.dbms.DBUpdater;
-import me.dariansandru.dbms.loggedUsers.LoggedAdmin;
 import me.dariansandru.domain.Admin;
 import me.dariansandru.ui.gui.adminGUI.AdminOrganiserPageGUI;
-import me.dariansandru.utilities.observer.Observable;
 import me.dariansandru.utilities.observer.Observer;
 
 import javax.swing.*;

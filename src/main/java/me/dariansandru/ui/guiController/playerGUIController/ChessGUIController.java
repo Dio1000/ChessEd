@@ -52,7 +52,8 @@ public class ChessGUIController {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1200, 700);
 
-        ChessGUI chessPanel = new ChessGUI(chessRound);
+        // Pass the frame to the ChessGUI constructor
+        ChessGUI chessPanel = new ChessGUI(chessRound, frame);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setBackground(Color.LIGHT_GRAY);

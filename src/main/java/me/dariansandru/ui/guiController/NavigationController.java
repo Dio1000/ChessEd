@@ -41,9 +41,6 @@ public class NavigationController {
     }
 
     public static void navigateTo(JFrame newFrame) {
-        if (newFrame instanceof AdminMainPageGUI){
-
-        }
         setCurrentFrame(newFrame);
         newFrame.setVisible(true);
         newFrame.repaint();

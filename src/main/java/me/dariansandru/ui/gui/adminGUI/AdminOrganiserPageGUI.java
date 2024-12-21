@@ -23,7 +23,7 @@ public class AdminOrganiserPageGUI extends JFrame {
     }
 
     public AdminOrganiserPageGUI() {
-        drawGUI();
+
     }
 
     public void drawGUI() {
@@ -78,7 +78,10 @@ public class AdminOrganiserPageGUI extends JFrame {
 
         frame.add(buttonsPanel, BorderLayout.SOUTH);
 
-        backButton.addActionListener(e -> NavigationController.navigateToAdminMainPage());
+        backButton.addActionListener(e -> {
+            NavigationController.navigateToAdminMainPage();
+            frame.dispose();
+        });
 
         frame.setVisible(true);
     }
