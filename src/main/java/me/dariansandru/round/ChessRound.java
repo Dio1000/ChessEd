@@ -1,5 +1,6 @@
 package me.dariansandru.round;
 
+import com.google.protobuf.Empty;
 import me.dariansandru.domain.chess.chessEngine.ChessEngine;
 import me.dariansandru.domain.chess.piece.Piece;
 import me.dariansandru.domain.chess.piece.PieceColour;
@@ -25,6 +26,14 @@ public class ChessRound implements GameRound{
     private final Player whitePiecesPlayer;
     private final Player blackPiecesPlayer;
     private final ChessEngine chessEngine = new ChessEngine();
+
+    private boolean hasWhiteKingMoved = false;
+    private boolean hasWhiteQueenRookMoved = false;
+    private boolean hasWhiteKingRookMoved = false;
+
+    private boolean hasBlackKingMoved = false;
+    private boolean hasBlackQueenRookMoved = false;
+    private boolean hasBlackKingRookMoved = false;
 
     private final Piece[][] pieces = new Piece[8][8];
 
@@ -146,7 +155,44 @@ public class ChessRound implements GameRound{
 
         return null;
     }
-    
+
+    /**
+     * Checks if the player can castle kingside
+     * @param pieceColour The player's colour
+     * @return true if castling is allowed
+     */
+    public boolean canCastleKingSide(PieceColour pieceColour) throws ValidatorException, InputException {
+        int kingRow = (pieceColour == PieceColour.WHITE) ? 0 : 7;
+        int kingCol = 4;
+
+        if (pieceColour == PieceColour.WHITE && (hasWhiteKingMoved || hasWhiteKingRookMoved)) return false;
+        if (pieceColour == PieceColour.BLACK && (hasBlackKingMoved || hasBlackKingRookMoved)) return false;
+
+        if (!pieces[kingRow][5].getName().equals("None") || !pieces[kingRow][6].getName().equals("None")) return false;
+        if (isKingChecked(kingRow, kingCol, pieceColour)) return false;
+
+        return !isKingChecked(kingRow, 5, pieceColour);
+    }
+
+    /**
+     * Checks if the player can castle queenside
+     * @param pieceColour The player's colour
+     * @return true if castling is allowed
+     */
+    public boolean canCastleQueenSide(PieceColour pieceColour) throws ValidatorException, InputException {
+        int kingRow = (pieceColour == PieceColour.WHITE) ? 0 : 7;
+        int kingCol = 4;
+
+        if (pieceColour == PieceColour.WHITE && (hasWhiteKingMoved || hasWhiteQueenRookMoved)) return false;
+        if (pieceColour == PieceColour.BLACK && (hasBlackKingMoved || hasBlackQueenRookMoved)) return false;
+
+        if (!pieces[kingRow][1].getName().equals("None") || !pieces[kingRow][2].getName().equals("None") ||
+                !pieces[kingRow][3].getName().equals("None")) return false;
+        if (isKingChecked(kingRow, kingCol, pieceColour)) return false;
+
+        return !isKingChecked(kingRow, 2, pieceColour);
+    }
+
     /**
      * Internal check to ensure a move is playable.
      * @param currentRow - current row in iteration
@@ -161,20 +207,49 @@ public class ChessRound implements GameRound{
     public boolean isMovePlayable(
             int currentRow, int currentCol, int row, int col,
             String piece, PieceColour pieceColour, String move
-    ) {
-        if (!pieces[currentRow][currentCol].getRepresentation().equals(piece)) {
-            return false;
+    ) throws ValidatorException, InputException {
+
+        Piece sourcePiece = pieces[currentRow][currentCol];
+        if (sourcePiece == null || !sourcePiece.getRepresentation().equals(piece)) return false;
+
+        if (sourcePiece.getColour() != pieceColour) return false;
+        if (!sourcePiece.isLegalMove(this, currentRow, currentCol, move)) return false;
+        if (!ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col)) return false;
+
+        if (piece.equals("K")) {
+            if (col == currentCol + 2) {
+                if (!canCastleKingSide(pieceColour)) return false;
+            }
+            else if (col == currentCol - 2) {
+                if (!canCastleQueenSide(pieceColour)) return false;
+            }
         }
-        if (pieces[currentRow][currentCol].getColour() != pieceColour) {
-            return false;
-        }
-        if (!pieces[currentRow][currentCol].isLegalMove(this, currentRow, currentCol, move)) {
-            return false;
-        }
-        return ChessValidator.validateObstruction(this, piece, currentRow, currentCol, row, col);
+
+        updateCastlingFlags(currentRow, currentCol, piece);
+        return true;
     }
 
-    
+    /**
+     * Auxiliary helper function to update the flags pertaining to the castling rights of a player.
+     * @param row Row of the piece.
+     * @param col Column of the piece.
+     * @param piece Piece representation.
+     */
+    private void updateCastlingFlags(int row, int col, String piece) {
+        switch (piece) {
+            case "K":
+                if (row == 0 && col == 4) hasWhiteKingMoved = true;
+                else if (row == 7 && col == 4) hasBlackKingMoved = true;
+                break;
+            case "R":
+                if (row == 0 && col == 0) hasWhiteQueenRookMoved = true;
+                else if (row == 0 && col == 7) hasWhiteKingRookMoved = true;
+                else if (row == 7 && col == 0) hasBlackQueenRookMoved = true;
+                else if (row == 7 && col == 7) hasBlackKingRookMoved = true;
+                break;
+        }
+    }
+
     /**
      * Internal check to ensure the king cannot be captured.<br>
      * This is done by moving the piece in memory, seeing if the king is in check, and undoing the move.
@@ -355,8 +430,8 @@ public class ChessRound implements GameRound{
                         } else {
                             piece = String.valueOf(move.charAt(0));
                         }
-                    } else
-                        piece = "P";
+                    }
+                    else piece = "P";
                     
                     if (isMovePlayable(row, col, kingRow, kingCol, 
                             piece, oppositeColour, move)) {

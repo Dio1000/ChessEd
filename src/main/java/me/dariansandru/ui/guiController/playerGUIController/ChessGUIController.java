@@ -2,6 +2,8 @@ package me.dariansandru.ui.guiController.playerGUIController;
 
 import me.dariansandru.controller.ChessController;
 import me.dariansandru.domain.chess.chessEngine.ChessEngine;
+import me.dariansandru.domain.chess.piece.PieceColour;
+import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.exception.InputException;
 import me.dariansandru.round.ChessRound;
 import me.dariansandru.ui.consoleUI.ChessConsoleUI;
@@ -14,9 +16,19 @@ public class ChessGUIController {
 
     private final ChessRound chessRound;
     private final ChessEngine chessEngine;
+    private final EvaluationBar evaluationBar;
+    private final JLabel currentTurnLabel;
 
     public ChessRound getChessRound() {
         return this.chessRound;
+    }
+
+    public void updateEvaluation(int whiteScore) {
+        evaluationBar.setWhitePercentage(whiteScore);
+    }
+
+    public void updateCurrentTurn(String turnText) {
+        currentTurnLabel.setText("Current Turn: " + turnText);
     }
 
     private static class EvaluationBar extends JPanel {
@@ -33,11 +45,14 @@ public class ChessGUIController {
             int width = getWidth();
             int height = getHeight();
 
-            g.setColor(Color.WHITE);
-            g.fillRect(0, 0, (width * whitePercentage) / 500, height);
+            int whiteHeight = (height * whitePercentage) / 500;
+            int blackHeight = height - whiteHeight;
 
             g.setColor(Color.BLACK);
-            g.fillRect((width * whitePercentage) / 500, 0, width - (width * whitePercentage) / 500, height);
+            g.fillRect(0, 0, width, blackHeight);
+
+            g.setColor(Color.WHITE);
+            g.fillRect(0, blackHeight, width, whiteHeight);
         }
     }
 
@@ -46,12 +61,14 @@ public class ChessGUIController {
         this.chessRound = chessController.getChessRound();
         this.chessEngine = new ChessEngine();
         chessEngine.setChessRound(chessRound);
+        this.evaluationBar = new EvaluationBar();
+        this.currentTurnLabel = new JLabel("Current Turn: WHITE");
     }
 
-    public void run() {
+    public void run() throws ValidatorException, InputException {
         JFrame frame = new JFrame("Chess");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1100, 700);
+        frame.setSize(1000, 700);
         frame.setLayout(new BorderLayout());
 
         ChessGUI chessPanel = new ChessGUI(this, frame);
@@ -66,10 +83,16 @@ public class ChessGUIController {
         resetButton.addActionListener(e -> {
             try {
                 chessRound.resetBoard();
+                chessPanel.setCurrentTurn(PieceColour.WHITE);
+                currentTurnLabel.setText("Current Turn: WHITE");
             } catch (InputException ex) {
                 throw new RuntimeException(ex);
             }
-            chessPanel.drawBoard();
+            try {
+                chessPanel.drawBoard();
+            } catch (ValidatorException | InputException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         JLabel title = new JLabel("Options");
@@ -77,14 +100,19 @@ public class ChessGUIController {
         title.setFont(new Font("Arial", Font.BOLD, 16));
         title.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        EvaluationBar evaluationBar = new EvaluationBar();
-        evaluationBar.setPreferredSize(new Dimension(180, 30));
-        evaluationBar.setMaximumSize(new Dimension(180, 30));
+        evaluationBar.setPreferredSize(new Dimension(40, 300));
+        evaluationBar.setMaximumSize(new Dimension(60, 400));
         evaluationBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        currentTurnLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        currentTurnLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        currentTurnLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         rightPanel.add(title);
         rightPanel.add(Box.createVerticalStrut(10));
         rightPanel.add(resetButton);
+        rightPanel.add(Box.createVerticalStrut(20));
+        rightPanel.add(currentTurnLabel);
         rightPanel.add(Box.createVerticalStrut(20));
         rightPanel.add(evaluationBar);
 
@@ -93,4 +121,6 @@ public class ChessGUIController {
 
         frame.setVisible(true);
     }
+
+
 }

@@ -4,6 +4,7 @@ import me.dariansandru.controller.ChessController;
 import me.dariansandru.dbms.DBQuery;
 import me.dariansandru.dbms.loggedUsers.LoggedPlayer;
 import me.dariansandru.domain.Player;
+import me.dariansandru.domain.validator.exception.ValidatorException;
 import me.dariansandru.io.InputDevice;
 import me.dariansandru.io.OutputDevice;
 import me.dariansandru.io.exception.InputException;
@@ -59,7 +60,11 @@ public class MainPageGUIController {
 
             InputDevice inputDevice = new InputDevice();
             ChessGUIController guiController = getChessGUIController(inputDevice);
-            guiController.run();
+            try {
+                guiController.run();
+            } catch (ValidatorException | InputException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         mainPageGUI.setStatsButtonAction(e -> {
