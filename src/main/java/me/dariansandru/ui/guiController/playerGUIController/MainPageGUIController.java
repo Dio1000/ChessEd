@@ -117,7 +117,6 @@ public class MainPageGUIController {
         }
 
         ChessConsoleUI chessConsoleUI = new ChessConsoleUI(inputDevice, outputDevice, chessController);
-        ChessGUIController guiController = new ChessGUIController(chessConsoleUI);
-        return guiController;
+        return new ChessGUIController(chessConsoleUI);
     }
 }

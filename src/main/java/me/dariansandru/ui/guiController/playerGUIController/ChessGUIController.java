@@ -15,6 +15,10 @@ public class ChessGUIController {
     private final ChessRound chessRound;
     private final ChessEngine chessEngine;
 
+    public ChessRound getChessRound() {
+        return this.chessRound;
+    }
+
     private static class EvaluationBar extends JPanel {
         private int whitePercentage = 250;
 
@@ -50,7 +54,7 @@ public class ChessGUIController {
         frame.setSize(1100, 700);
         frame.setLayout(new BorderLayout());
 
-        ChessGUI chessPanel = new ChessGUI(chessRound, frame);
+        ChessGUI chessPanel = new ChessGUI(this, frame);
 
         JPanel rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));

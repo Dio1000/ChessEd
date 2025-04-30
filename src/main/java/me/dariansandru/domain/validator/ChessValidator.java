@@ -156,26 +156,28 @@ public abstract class ChessValidator {
         return true;
     }
 
-    private static boolean validateRowMove(ChessRound chessRound, int currentRow, int currentCol, int newRow, int newCol){
+    private static boolean validateRowMove(ChessRound chessRound, int currentRow, int currentCol, int newRow, int newCol) {
         Piece[][] pieces = chessRound.getPieces();
 
         // Case 0 - Did not move on the row
         if (currentCol != newCol) return false;
 
         // Case 1 - Moves down
-        if (currentRow > newRow){
+        if (currentRow > newRow) {
             currentRow--;
-            while (currentRow != newRow){
-                if (!Objects.equals(pieces[currentRow][currentCol].getName(), "None")) return false;
+            while (currentRow != newRow) {
+                Piece piece = pieces[currentRow][currentCol];
+                if (piece == null || !Objects.equals(piece.getName(), "None")) return false;
                 currentRow--;
             }
         }
 
         // Case 2 - Moves up
-        if (currentRow < newRow){
+        if (currentRow < newRow) {
             currentRow++;
-            while (currentRow != newRow){
-                if (!Objects.equals(pieces[currentRow][currentCol].getName(), "None")) return false;
+            while (currentRow != newRow) {
+                Piece piece = pieces[currentRow][currentCol];
+                if (piece == null || !Objects.equals(piece.getName(), "None")) return false;
                 currentRow++;
             }
         }
