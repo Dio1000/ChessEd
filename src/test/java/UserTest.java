@@ -7,6 +7,12 @@ import java.util.List;
 
 public class UserTest {
     @Test
+    public void testUsers(){
+        testPlayerFields();
+        testAdminFields();
+    }
+
+    @Test
     public void testPlayerFields(){
         System.out.println("Testing Player Fields:");
         Player player = new Player();
@@ -32,6 +38,7 @@ public class UserTest {
         player.setWinLossRatio();
         assert((int)player.getWinLossRatio() == 0);
         System.out.println("Test 3 passed! Win/Loss ratio works correctly for zero values.");
+        System.out.println();
     }
 
     @Test
@@ -56,5 +63,6 @@ public class UserTest {
         assert(admin.getPermissions().get(1).equals("Modify Rating Permission"));
         assert(admin.getPermissions().get(2).equals("Report Hacker Permission"));
         System.out.println("Test 2 passed! Permissions are set correctly.");
+        System.out.println();
     }
 }

@@ -99,6 +99,10 @@ public class LoginPageGUI {
         }
 
         List<String> loggedPlayerData = DBQuery.getDataByUsername(username);
+        if (DBQuery.isBanned(loggedPlayerData.get(1))){
+            JOptionPane.showMessageDialog(null, "You are banned! Get outta here!", "Login Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         DBQuery.setPlayerData(loggedPlayer, loggedPlayerData);
 
         JOptionPane.showMessageDialog(null, "Login successful!", "Success", JOptionPane.INFORMATION_MESSAGE);

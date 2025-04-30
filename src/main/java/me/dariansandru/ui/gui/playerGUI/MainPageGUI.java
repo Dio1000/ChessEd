@@ -9,16 +9,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class MainPageGUI extends JFrame{
+public class MainPageGUI extends JFrame {
 
     private JFrame frame;
 
     private JButton loginButton;
     private JButton registerButton;
     private JButton playButton;
+    private JButton statsButton;
     private JLabel messageLabel;
 
     private final Observer<Player> loggedPlayer = new Observer<>();
+    public String loggedPlayerName;
 
     public Observer<Player> getLoggedPlayer() {
         return loggedPlayer;
@@ -31,8 +33,12 @@ public class MainPageGUI extends JFrame{
     public MainPageGUI() {
         LoggedPlayer.getLoggedPlayer().addObserver(loggedPlayer);
         loggedPlayer.addChangeListener(newPlayer -> {
-            if (newPlayer == null) messageLabel.setText("You are not logged in!");
-            else messageLabel.setText("Welcome " + newPlayer.getUsername() + "!");
+            if (newPlayer == null) {
+                messageLabel.setText("You are not logged in!");
+            } else {
+                loggedPlayerName = newPlayer.getUsername();
+                messageLabel.setText("Welcome " + loggedPlayerName + "!");
+            }
         });
     }
 
@@ -42,11 +48,13 @@ public class MainPageGUI extends JFrame{
         frame.setSize(400, 300);
         frame.setLayout(new BorderLayout());
 
-        JLabel placeholderLabel = new JLabel("ChessPlaceholder", SwingConstants.CENTER);
+        JLabel placeholderLabel = new JLabel("ChessEd", SwingConstants.CENTER);
         placeholderLabel.setFont(new Font("Arial", Font.BOLD, 20));
         frame.add(placeholderLabel, BorderLayout.NORTH);
 
-        if (messageLabel == null) messageLabel = new JLabel("You are not logged in!", SwingConstants.CENTER);
+        if (messageLabel == null) {
+            messageLabel = new JLabel("You are not logged in!", SwingConstants.CENTER);
+        }
 
         messageLabel.setFont(new Font("Arial", Font.PLAIN, 14));
         frame.add(messageLabel, BorderLayout.CENTER);
@@ -58,13 +66,17 @@ public class MainPageGUI extends JFrame{
         loginButton = new JButton("Login");
         registerButton = new JButton("Register");
         playButton = new JButton("Play");
+        statsButton = new JButton("Stats");
 
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         registerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        statsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(playButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonPanel.add(statsButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(loginButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -85,5 +97,9 @@ public class MainPageGUI extends JFrame{
 
     public void setPlayButtonAction(ActionListener action) {
         playButton.addActionListener(action);
+    }
+
+    public void setStatsButtonAction(ActionListener action) {
+        statsButton.addActionListener(action);
     }
 }

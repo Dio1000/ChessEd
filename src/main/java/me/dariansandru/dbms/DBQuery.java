@@ -197,4 +197,52 @@ public class DBQuery {
 
         return false;
     }
+
+    public static boolean isBanned(String username) {
+        String query = "SELECT isBanned FROM BannedPlayers WHERE username = ?";
+        boolean isBanned = false;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+            preparedStatement.setString(1, username);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    int isBannedValue = resultSet.getInt("isBanned");
+                    isBanned = (isBannedValue == 1);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error checking banned status: " + e.getMessage());
+        }
+
+        return isBanned;
+    }
+
+    public static void banPlayer(String username) {
+        String insertOrUpdateSQL = """
+        INSERT INTO BannedPlayers (username, isBanned)
+        VALUES (?, TRUE)
+        ON DUPLICATE KEY UPDATE isBanned = TRUE;
+    """;
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(insertOrUpdateSQL)) {
+
+            preparedStatement.setString(1, username);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Player " + username + " has been banned successfully.");
+            } else {
+                System.out.println("Failed to ban player " + username + ".");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error banning player: " + e.getMessage());
+        }
+    }
+
 }

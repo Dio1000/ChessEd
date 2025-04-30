@@ -158,7 +158,7 @@ public class ChessRound implements GameRound{
      * @param move - the move String
      * @return True if playable, false otherwise
      */
-    private boolean isMovePlayable(
+    public boolean isMovePlayable(
             int currentRow, int currentCol, int row, int col,
             String piece, PieceColour pieceColour, String move
     ) {

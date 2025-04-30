@@ -7,6 +7,13 @@ import me.dariansandru.io.exception.InputException;
 import me.dariansandru.round.ChessRound;
 import me.dariansandru.utilities.ChessUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
 public class ChessEngine {
     private static ChessEngineUtils chessEngineUtils = new ChessEngineUtils();
     private static ChessRound chessRound;
@@ -24,6 +31,36 @@ public class ChessEngine {
         chessEngineUtils.setChessRound(chessRound);
     }
 
+    public int evaluatePosition(PieceColour colour) throws ValidatorException, InputException {
+        if (chessRound.isCheckmate(colour) && colour == PieceColour.WHITE) return -10000;
+        else if (chessRound.isCheckmate(colour) && colour == PieceColour.BLACK) return 10000;
+
+        int cores = Runtime.getRuntime().availableProcessors();
+        ExecutorService executor = Executors.newFixedThreadPool(cores);
+
+        List<Callable<Integer>> tasks = new ArrayList<>();
+        tasks.add(() -> evaluateMaterial(colour));
+        tasks.add(() -> evaluateAvailableCaptures(colour));
+        tasks.add(() -> evaluateKingSafety(colour));
+        tasks.add(() -> evaluateMobility(colour));
+        tasks.add(() -> evaluatePawnStructure(colour));
+        tasks.add(() -> evaluatePieceActivity(colour));
+
+        int totalScore = 0;
+        try {
+            List<Future<Integer>> results = executor.invokeAll(tasks);
+            for (Future<Integer> result : results) {
+                totalScore += result.get();
+            }
+        } catch (Exception e) {
+            System.err.println("Error during parallel evaluation: " + e.getMessage());
+        } finally {
+            executor.shutdown();
+        }
+
+        return totalScore;
+    }
+
     private int evaluateMaterial(PieceColour colour) {
         int weight = 7;
         int playerMaterialAdvantage = ChessUtils.getColourMaterialAdvantage(chessRound, colour);
@@ -33,20 +70,17 @@ public class ChessEngine {
     private int evaluateAvailableCaptures(PieceColour colour) {
         int totalPlayer = 0;
         int totalOpponent = 0;
-        int total;
         int weight = 2;
 
-        for (int row = 0 ; row < 8 ; row++){
-            for (int col = 0 ; col < 8 ; col++){
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
                 if (pieces[row][col].getColour() == colour)
                     totalPlayer += chessEngineUtils.numberOfPossibleCaptures(pieces[row][col], row, col);
                 else if (pieces[row][col].getColour() != colour)
                     totalOpponent += chessEngineUtils.numberOfPossibleCaptures(pieces[row][col], row, col);
             }
         }
-        total = totalPlayer - totalOpponent;
-
-        return (colour == PieceColour.WHITE) ? total * weight : -total * weight;
+        return (colour == PieceColour.WHITE) ? (totalPlayer - totalOpponent) * weight : (totalOpponent - totalPlayer) * weight;
     }
 
     private int evaluateKingSafety(PieceColour colour) {
@@ -69,7 +103,6 @@ public class ChessEngine {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 Piece piece = pieces[row][col];
-
                 if (piece.getColour() == colour) {
                     if ((row == 3 || row == 4) && (col == 3 || col == 4)) {
                         score += 5 * weight;
@@ -130,20 +163,4 @@ public class ChessEngine {
         }
         return (colour == PieceColour.WHITE) ? totalMoves * weight : -totalMoves * weight;
     }
-
-    public int evaluatePosition(PieceColour colour) throws ValidatorException, InputException {
-        if (chessRound.isCheckmate(colour) && colour == PieceColour.WHITE) return -10000;
-        else if (chessRound.isCheckmate(colour) && colour == PieceColour.BLACK) return 10000;
-
-        int materialScore = evaluateMaterial(colour);
-        int captureScore = evaluateAvailableCaptures(colour);
-        int kingSafetyScore = evaluateKingSafety(colour);
-        int mobilityScore = evaluateMobility(colour);
-        int pawnStructureScore = evaluatePawnStructure(colour);
-        int pieceActivityScore = evaluatePieceActivity(colour);
-
-        return materialScore + captureScore + kingSafetyScore
-                + mobilityScore + pawnStructureScore + pieceActivityScore;
-    }
-
 }

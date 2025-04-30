@@ -45,7 +45,7 @@ public class Main {
 
         switch (args[0].toLowerCase()) {
             case "gui" -> {
-                DBCreator.createTables();
+                //DBCreator.createTables();
 
                 if (args.length == 1) {
                     MainPageGUI mainPageGUI = new MainPageGUI();
@@ -83,6 +83,8 @@ public class Main {
                 chessConsoleUI.show();
             }
             case "trunc" -> DBCreator.truncateTables();
+            case "drop" -> DBCreator.deleteTables();
+            case "data" -> DBCreator.showAllData();
             case "rules" -> Manual.showRules(outputDevice);
             default -> throw new IllegalStateException("Could not find command: " + args[0]);
         }

@@ -5,24 +5,28 @@ import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.chess.piece.Pawn;
 import me.dariansandru.round.ChessRound;
 import me.dariansandru.utilities.ChessUtils;
+import me.dariansandru.utilities.Pair;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 import static me.dariansandru.utilities.ChessUtils.getColRow;
-import me.dariansandru.utilities.Pair;
 
-/**
- * Using this class allows the user to use a custom-made GUI for a Chess game.
- */
 public class ChessGUI extends JPanel {
-
     private Piece[][] pieces;
     private final ChessRound chessRound;
-    private Point selectedSquare;
+
     private JFrame parentFrame;
+    private JPanel boardPanel;
+    private static final Color LIGHT_SQUARE = new Color(240, 217, 181);
+    private static final Color DARK_SQUARE = new Color(181, 136, 99);
+
+    private static final int SQUARE_SIZE = 64;
+    private PieceColour currentTurn = PieceColour.WHITE;
+    private JPanel selectedSquarePanel = null;
 
     public ChessGUI(ChessRound chessRound, JFrame parentFrame) {
         this.chessRound = chessRound;
@@ -32,29 +36,18 @@ public class ChessGUI extends JPanel {
         drawBoard();
     }
 
-    /**
-     * Fetches the image of a piece from the images directory to display on the board.
-     *
-     * @param piece Piece to display.
-     * @return Image of the piece with the correct colour.
-     */
     private Image getImageFromPiece(Piece piece) {
         if (Objects.equals(piece.getName(), "None"))
             return null;
         PieceColour colour = piece.getColour();
         String imageName = "images/" + piece.getName() + colour.toString() + ".jpeg";
         ImageIcon icon = new ImageIcon(imageName);
-        return icon.getImage().getScaledInstance(64, 64, Image.SCALE_SMOOTH);
+        return icon.getImage().getScaledInstance(SQUARE_SIZE - 10, SQUARE_SIZE - 10, Image.SCALE_SMOOTH);
     }
 
-    /**
-     * Draws the board in the initial state. Should only be used once because
-     * of the high cost of the operation.
-     */
     public void drawBoard() {
         this.removeAll();
 
-        // Add the top panel for the back button
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BorderLayout());
         JButton backButton = new JButton("Back");
@@ -62,50 +55,124 @@ public class ChessGUI extends JPanel {
         topPanel.add(backButton, BorderLayout.WEST);
         this.add(topPanel, BorderLayout.NORTH);
 
-        // Create the chessboard
-        JPanel boardPanel = new JPanel();
+        boardPanel = new JPanel();
         boardPanel.setLayout(new GridLayout(8, 8));
         pieces = chessRound.getPieces();
 
+        MouseAdapter clickHandler = new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                JPanel clickedSquare = (JPanel) e.getComponent();
+                int squareIndex = getSquareIndex(clickedSquare);
+                int toRow = 7 - (squareIndex / 8);
+                int toCol = squareIndex % 8;
+                Piece clickedPiece = pieces[toRow][toCol];
+
+                if (selectedSquarePanel == null) {
+                    if (clickedPiece != null && clickedPiece.getColour() == currentTurn) {
+                        selectedSquarePanel = clickedSquare;
+                        selectedSquarePanel.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
+                    }
+                }
+                else {
+                    int fromIndex = getSquareIndex(selectedSquarePanel);
+                    int fromRow = 7 - (fromIndex / 8);
+                    int fromCol = fromIndex % 8;
+                    Piece movingPiece = pieces[fromRow][fromCol];
+
+                    if (movingPiece == null) {
+                        selectedSquarePanel.setBorder(null);
+                        selectedSquarePanel = null;
+                        return;
+                    }
+
+                    String pieceNotation = movingPiece.getRepresentation();
+                    String moveNotation;
+
+                    char file = (char)('a' + toCol);
+                    int rank = toRow + 1;
+
+                    if (pieceNotation.equals("P")) moveNotation = "" + file + rank;
+                    else moveNotation = pieceNotation + file + rank;
+
+
+                    try {
+                        if (chessRound.isMovePlayable(
+                                fromRow, fromCol,
+                                toRow, toCol,
+                                pieceNotation,
+                                currentTurn,
+                                moveNotation
+                        )) {
+                            pieces[toRow][toCol] = movingPiece;
+                            pieces[fromRow][fromCol] = null;
+
+                            selectedSquarePanel.removeAll();
+                            selectedSquarePanel.setBorder(null);
+
+                            clickedSquare.removeAll();
+                            Image scaledImage = getImageFromPiece(movingPiece);
+                            if (scaledImage != null) {
+                                clickedSquare.add(new JLabel(new ImageIcon(scaledImage)));
+                            }
+
+                            currentTurn = (currentTurn == PieceColour.WHITE) ? PieceColour.BLACK : PieceColour.WHITE;
+                        }
+                        else {
+                            selectedSquarePanel.setBorder(null);
+                            JOptionPane.showMessageDialog(ChessGUI.this,
+                                    "Illegal move: " + moveNotation,
+                                    "Move Not Allowed",
+                                    JOptionPane.WARNING_MESSAGE);
+                        }
+                    } catch (Exception ex) {
+                        selectedSquarePanel.setBorder(null);
+                        JOptionPane.showMessageDialog(ChessGUI.this,
+                                "Error validating move: " + ex.getMessage(),
+                                "Move Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    selectedSquarePanel = null;
+                }
+            }
+        };
+
         for (int row = 7; row >= 0; row--) {
             for (int col = 0; col < 8; col++) {
-                JLabel square = new JLabel();
+                JPanel square = new JPanel(new BorderLayout());
+                square.setPreferredSize(new Dimension(SQUARE_SIZE, SQUARE_SIZE));
                 square.setOpaque(true);
-
-                if ((row + col) % 2 == 0) {
-                    square.setBackground(Color.PINK);
-                } else {
-                    square.setBackground(Color.WHITE);
-                }
+                square.setBackground((row + col) % 2 == 0 ? LIGHT_SQUARE : DARK_SQUARE);
 
                 Image scaledImage = getImageFromPiece(pieces[row][col]);
                 if (scaledImage != null) {
-                    square.setIcon(new ImageIcon(scaledImage));
+                    square.add(new JLabel(new ImageIcon(scaledImage)));
                 }
+
+                square.addMouseListener(clickHandler);
                 boardPanel.add(square);
             }
         }
 
         this.add(boardPanel, BorderLayout.CENTER);
-
         this.revalidate();
         this.repaint();
     }
 
-    /**
-     * Updates the board to increase efficiency of displays by only updating
-     * the moved piece.
-     *
-     * @param move Move that was played.
-     * @param colour Colour of the piece that was moved.
-     * @param startLocation The start location of the moved piece.
-     */
+    private JPanel getSquareAtLocation(Point location) {
+        for (Component comp : boardPanel.getComponents()) {
+            if (comp instanceof JPanel && comp.getLocation().equals(location)) {
+                return (JPanel) comp;
+            }
+        }
+        return null;
+    }
+
     public void updateBoard(String move, PieceColour colour, Pair<Integer, Integer> startLocation) {
         try {
-            System.out.println(move);
             int destinationCol = getColRow(move).getValue1();
             int destinationRow = getColRow(move).getValue2();
-
             int startRow = startLocation.getValue1();
             int startCol = startLocation.getValue2();
 
@@ -116,24 +183,23 @@ public class ChessGUI extends JPanel {
             int startSquareIndex = (7 - startRow) * 8 + startCol;
             int destinationSquareIndex = (7 - destinationRow) * 8 + destinationCol;
 
-            System.out.println(startRow + " " + startCol);
-            System.out.println(destinationCol + " " + destinationRow);
-            System.out.println(startSquareIndex + " " + destinationSquareIndex);
+            JPanel startSquare = (JPanel) boardPanel.getComponent(startSquareIndex);
+            startSquare.removeAll();
+            startSquare.revalidate();
+            startSquare.repaint();
 
-            JLabel startSquare = (JLabel) this.getComponent(startSquareIndex + 1); // +1 for top panel
-            startSquare.setIcon(null);
-
-            JLabel destinationSquare = (JLabel) this.getComponent(destinationSquareIndex + 1); // +1 for top panel
+            JPanel destinationSquare = (JPanel) boardPanel.getComponent(destinationSquareIndex);
+            destinationSquare.removeAll();
             Image scaledImage = getImageFromPiece(pieceToMove);
             if (scaledImage != null) {
-                destinationSquare.setIcon(new ImageIcon(scaledImage));
+                destinationSquare.add(new JLabel(new ImageIcon(scaledImage)));
             }
-
-            this.revalidate();
-            this.repaint();
+            destinationSquare.revalidate();
+            destinationSquare.repaint();
 
         } catch (Exception ex) {
-            System.err.println("Error updating board: " + ex.getMessage());
+            System.out.println("Error updating board: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -142,4 +208,15 @@ public class ChessGUI extends JPanel {
             parentFrame.dispose();
         }
     }
+
+    private int getSquareIndex(JPanel square) {
+        Component[] squares = boardPanel.getComponents();
+        for (int i = 0; i < squares.length; i++) {
+            if (squares[i] == square) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 }

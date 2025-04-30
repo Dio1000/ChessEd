@@ -63,7 +63,7 @@ public class AdminOrganiserPageGUIController {
         String player = adminOrganiserPageGUI.getBanPlayerField().getText();
         if (playerValidation(player)) return;
 
-        DBUpdater.deletePlayer(player);
+        DBQuery.banPlayer(player);
         JOptionPane.showMessageDialog(null, "Player " + player + " has been banned!", "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 
