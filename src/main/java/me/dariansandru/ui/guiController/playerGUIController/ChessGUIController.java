@@ -1,5 +1,6 @@
 package me.dariansandru.ui.guiController.playerGUIController;
 
+import com.sun.source.tree.ReturnTree;
 import me.dariansandru.controller.ChessController;
 import me.dariansandru.domain.chess.chessEngine.ChessEngine;
 import me.dariansandru.domain.chess.piece.PieceColour;
@@ -18,6 +19,7 @@ public class ChessGUIController {
     private final ChessEngine chessEngine;
     private final EvaluationBar evaluationBar;
     private final JLabel currentTurnLabel;
+    private final boolean vsAI;
 
     public ChessRound getChessRound() {
         return this.chessRound;
@@ -58,6 +60,7 @@ public class ChessGUIController {
 
     public ChessGUIController(ChessConsoleUI chessConsoleUI) {
         ChessController chessController = chessConsoleUI.getChessController();
+        this.vsAI = chessController.isVsAI();
         this.chessRound = chessController.getChessRound();
         this.chessEngine = new ChessEngine();
         chessEngine.setChessRound(chessRound);
@@ -120,6 +123,10 @@ public class ChessGUIController {
         frame.add(rightPanel, BorderLayout.EAST);
 
         frame.setVisible(true);
+    }
+
+    public boolean isVsAI() {
+        return vsAI;
     }
 
 

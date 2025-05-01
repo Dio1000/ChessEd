@@ -18,6 +18,7 @@ public class ChessController implements GameController {
     private int turn;
     private final List<String> turns;
     private final ChessRound chessRound;
+    private boolean vsAI;
 
     private final Player whitePiecesPlayer;
     private final Player blackPiecesPlayer;
@@ -140,6 +141,14 @@ public class ChessController implements GameController {
      */
     public ChessRound getChessRound(){
         return chessRound;
+    }
+
+    public void setVsAI(boolean vsAI) {
+        this.vsAI = vsAI;
+    }
+
+    public boolean isVsAI() {
+        return vsAI;
     }
 
 }

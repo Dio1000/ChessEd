@@ -1,5 +1,6 @@
 package me.dariansandru.ui.gui.playerGUI;
 
+import me.dariansandru.domain.chess.chessEngine.EngineConnector;
 import me.dariansandru.domain.chess.piece.Piece;
 import me.dariansandru.domain.chess.piece.PieceColour;
 import me.dariansandru.domain.validator.exception.ValidatorException;
@@ -11,26 +12,43 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Objects;
 
 public class ChessGUI extends JPanel {
     private final ChessGUIController controller;
+    private EngineConnector engine;
     private Piece[][] pieces;
-    private PieceColour currentTurn = PieceColour.WHITE;
-    private JPanel selectedSquarePanel = null;
     private int selectedRow = -1;
     private int selectedCol = -1;
-    private JFrame parentFrame;
+
+    private final boolean vsAI;
+    private PieceColour currentTurn;
+    private JPanel selectedSquarePanel = null;
+
+    private final JFrame parentFrame;
     private JPanel boardPanel;
-    private JPanel[][] squarePanels = new JPanel[8][8];
+    private final JPanel[][] squarePanels = new JPanel[8][8];
     private static final Color LIGHT_SQUARE = new Color(240, 217, 181);
     private static final Color DARK_SQUARE = new Color(181, 136, 99);
     private static final int SQUARE_SIZE = 64;
 
     public ChessGUI(ChessGUIController controller, JFrame parentFrame) throws ValidatorException, InputException {
         this.controller = controller;
+        this.vsAI = controller.isVsAI();
         this.parentFrame = parentFrame;
         this.pieces = controller.getChessRound().getPieces();
+        this.currentTurn = PieceColour.WHITE;
+
+        if (vsAI) {
+            this.engine = new EngineConnector("localhost", 12345, 5000);
+            try {
+                this.engine.connect();
+            } catch (IOException e) {
+                System.err.println("Failed to connect to engine: " + e.getMessage());
+            }
+        }
+
         this.setLayout(new BorderLayout());
         drawBoard();
     }
@@ -46,8 +64,6 @@ public class ChessGUI extends JPanel {
     public void drawBoard() throws ValidatorException, InputException {
         this.removeAll();
         this.pieces = controller.getChessRound().getPieces();
-        String fen = FENEncoder.encode(controller.getChessRound(), currentTurn);
-        System.out.println("FEN: " + fen);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         JButton backButton = new JButton("Back");
@@ -83,6 +99,10 @@ public class ChessGUI extends JPanel {
         return new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if (vsAI && currentTurn == PieceColour.BLACK) {
+                    return;
+                }
+
                 JPanel clickedSquare = (JPanel) e.getComponent();
                 int squareIndex = getSquareIndex(clickedSquare);
                 int toRow = 7 - (squareIndex / 8);
@@ -97,8 +117,7 @@ public class ChessGUI extends JPanel {
                 }
 
                 if (selectedSquarePanel == null) {
-                    if (pieces[toRow][toCol] != null &&
-                            pieces[toRow][toCol].getColour() == currentTurn) {
+                    if (pieces[toRow][toCol] != null && pieces[toRow][toCol].getColour() == currentTurn) {
                         selectedSquarePanel = clickedSquare;
                         selectedRow = toRow;
                         selectedCol = toCol;
@@ -108,14 +127,12 @@ public class ChessGUI extends JPanel {
                     Piece selectedPiece = pieces[selectedRow][selectedCol];
                     Piece clickedPiece = pieces[toRow][toCol];
 
-                    if (selectedPiece.getRepresentation().equals("K") &&
-                            clickedPiece != null &&
-                            clickedPiece.getColour() == currentTurn &&
-                            clickedPiece.getRepresentation().equals("R")) {
+                    if (selectedPiece.getRepresentation().equals("K") && clickedPiece != null &&
+                            clickedPiece.getColour() == currentTurn && clickedPiece.getRepresentation().equals("R")) {
                         handleCastling(selectedRow, selectedCol, toCol);
                     } else {
                         String moveNotation = createMoveNotation(selectedRow, selectedCol, toRow, toCol);
-                        tryMove(selectedRow, selectedCol, toRow, toCol, moveNotation);
+                        tryMove(selectedRow, selectedCol, toRow, toCol, moveNotation, true);
                     }
                 }
             }
@@ -154,21 +171,26 @@ public class ChessGUI extends JPanel {
         clearSelection();
     }
 
-    private void tryMove(int fromRow, int fromCol, int toRow, int toCol, String moveNotation) {
+    private void tryMove(int fromRow, int fromCol, int toRow, int toCol, String moveNotation, boolean isPlayerMove) {
         try {
-            if (controller.getChessRound().isMovePlayable(
-                    fromRow, fromCol, toRow, toCol,
-                    pieces[fromRow][fromCol].getRepresentation(),
-                    currentTurn, moveNotation)) {
+            if (controller.getChessRound().isMovePlayable(fromRow, fromCol, toRow, toCol,
+                    pieces[fromRow][fromCol].getRepresentation(), currentTurn, moveNotation)) {
 
                 controller.getChessRound().movePiece(moveNotation, currentTurn);
                 pieces = controller.getChessRound().getPieces();
                 redrawSquareUpdates(fromRow, fromCol, toRow, toCol);
-
-                String fen = FENEncoder.encode(controller.getChessRound(), currentTurn);
-                System.out.println("FEN: " + fen);
-
                 switchTurn();
+
+                if (vsAI && currentTurn == PieceColour.BLACK && isPlayerMove) {
+                    SwingUtilities.invokeLater(() -> {
+                        try {
+                            requestEngineMove();
+                        } catch (ValidatorException | InputException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                }
+
             } else {
                 clearSelection();
             }
@@ -177,19 +199,12 @@ public class ChessGUI extends JPanel {
         }
     }
 
-    private void switchTurn() {
-        currentTurn = currentTurn == PieceColour.WHITE ? PieceColour.BLACK : PieceColour.WHITE;
-        controller.updateCurrentTurn(currentTurn.name());
-        controller.updateEvaluation(250);
-    }
-
     private void updateSquare(int row, int col) {
         JPanel square = squarePanels[row][col];
         square.removeAll();
         Image img = getImageFromPiece(pieces[row][col]);
-        if (img != null) {
-            square.add(new JLabel(new ImageIcon(img)));
-        }
+        if (img != null) square.add(new JLabel(new ImageIcon(img)));
+
         square.revalidate();
         square.repaint();
     }
@@ -223,10 +238,62 @@ public class ChessGUI extends JPanel {
     }
 
     private void handleBackButton() {
+        if (engine != null) {
+            engine.disconnect();
+        }
         if (parentFrame != null) parentFrame.dispose();
     }
 
     public void setCurrentTurn(PieceColour turn) {
         this.currentTurn = turn;
+    }
+
+    private void requestEngineMove() throws ValidatorException, InputException {
+        if (!vsAI || currentTurn != PieceColour.BLACK) return;
+
+        String fen = FENEncoder.encode(controller.getChessRound(), currentTurn);
+        try {
+            String move = engine.getBestMove(fen);
+            if (move != null && (move.length() == 4 || move.length() == 5)) executeEngineMove(move);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Engine error: " + e.getMessage());
+        }
+    }
+
+    private void executeEngineMove(String engineMove) throws ValidatorException, InputException {
+        int fromCol = engineMove.charAt(0) - 'a';
+        int fromRow = (Character.getNumericValue(engineMove.charAt(1)) - 1);
+
+        int toCol = engineMove.charAt(2) - 'a';
+        int toRow = (Character.getNumericValue(engineMove.charAt(3)) - 1);
+
+        String promotion = engineMove.length() == 5 ? String.valueOf(engineMove.charAt(4)).toUpperCase() : null;
+
+        String pieceSymbol = pieces[fromRow][fromCol].getRepresentation();
+        String moveNotation;
+
+        if (pieceSymbol.equals("P")) {
+            char file = (char) ('a' + toCol);
+            int rank = toRow + 1;
+            moveNotation = promotion != null ? file + "" + rank + promotion : file + "" + rank;
+        } else {
+            char file = (char) ('a' + toCol);
+            int rank = toRow + 1;
+            moveNotation = pieceSymbol + file + rank;
+        }
+
+        controller.getChessRound().movePiece(moveNotation, currentTurn);
+        pieces = controller.getChessRound().getPieces();
+
+        updateSquare(fromRow, fromCol);
+        updateSquare(toRow, toCol);
+
+        currentTurn = PieceColour.WHITE;
+        controller.updateCurrentTurn(currentTurn.name());
+    }
+
+    private void switchTurn() {
+        currentTurn = currentTurn == PieceColour.WHITE ? PieceColour.BLACK : PieceColour.WHITE;
+        controller.updateCurrentTurn(currentTurn.name());
     }
 }

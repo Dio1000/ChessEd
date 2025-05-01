@@ -157,6 +157,26 @@ public class ChessRound implements GameRound{
     }
 
     /**
+     * Checks if the player using a given piece colour has king side castling privilege.
+     * @param pieceColour Piece colour of the player to check for.
+     * @return True if the player with the given piece colour has king side castle privilege, false otherwise.
+     */
+    public boolean hasKingSideCastlePrivilege(PieceColour pieceColour) {
+        if (pieceColour == PieceColour.WHITE) return !(hasWhiteKingMoved && hasWhiteKingRookMoved);
+        else return !(hasBlackKingMoved && hasBlackKingRookMoved);
+    }
+
+    /**
+     * Checks if the player using a given piece colour has queen side castling privilege.
+     * @param pieceColour Piece colour of the player to check for.
+     * @return True if the player with the given piece colour has queen side castle privilege, false otherwise.
+     */
+    public boolean hasQueenSideCastlePrivilege(PieceColour pieceColour) {
+        if (pieceColour == PieceColour.WHITE) return !(hasWhiteKingMoved && hasWhiteQueenRookMoved);
+        else return !(hasBlackKingMoved && hasBlackQueenRookMoved);
+    }
+
+    /**
      * Checks if the player can castle kingside
      * @param pieceColour The player's colour
      * @return true if castling is allowed
@@ -437,7 +457,6 @@ public class ChessRound implements GameRound{
                             piece, oppositeColour, move)) {
                         return true;
                     }
-                    
                 }
             }
         }
@@ -628,5 +647,9 @@ public class ChessRound implements GameRound{
         int blackPiecesPlayerScore = -chessEngine.evaluatePosition(PieceColour.BLACK);
 
         return whitePiecesPlayerScore - blackPiecesPlayerScore;
+    }
+
+    public void setSquare(Piece piece, int row, int col) {
+        this.getPieces()[row][col] = piece;
     }
 }

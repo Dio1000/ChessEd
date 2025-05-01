@@ -19,7 +19,6 @@ import java.awt.*;
 import java.util.List;
 
 public class MainPageGUIController {
-
     private MainPageGUI mainPageGUI;
 
     public MainPageGUIController(MainPageGUI mainPageGUI) {
@@ -51,15 +50,19 @@ public class MainPageGUIController {
             NavigationController.navigateTo(registerPage.getFrame());
         });
 
-        mainPageGUI.setPlayButtonAction(e -> {
-            // TODO make playing without an account temporary possible
-//            if (mainPageGUI.getLoggedPlayer().getReference() == null) {
-//                JOptionPane.showMessageDialog(null, "You are not logged in!", "Error", JOptionPane.ERROR_MESSAGE);
-//                return;
-//            }
-
+        mainPageGUI.setPlayHumanButtonAction(e -> {
             InputDevice inputDevice = new InputDevice();
-            ChessGUIController guiController = getChessGUIController(inputDevice);
+            ChessGUIController guiController = getChessGUIController(inputDevice, false);
+            try {
+                guiController.run();
+            } catch (ValidatorException | InputException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        mainPageGUI.setPlayAIButtonAction(e -> {
+            InputDevice inputDevice = new InputDevice();
+            ChessGUIController guiController = getChessGUIController(inputDevice, true);
             try {
                 guiController.run();
             } catch (ValidatorException | InputException ex) {
@@ -68,9 +71,7 @@ public class MainPageGUIController {
         });
 
         mainPageGUI.setStatsButtonAction(e -> {
-            System.out.println(mainPageGUI.loggedPlayerName);
             List<String> playerData = DBQuery.getDataByUsername(mainPageGUI.loggedPlayerName);
-
             if (playerData.isEmpty()) {
                 JOptionPane.showMessageDialog(null, "Player data not found!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -102,21 +103,19 @@ public class MainPageGUIController {
             buttonPanel.add(closeButton);
 
             statsFrame.add(buttonPanel, BorderLayout.SOUTH);
-
             statsFrame.setVisible(true);
         });
-
     }
 
-    private static ChessGUIController getChessGUIController(InputDevice inputDevice) {
+    private static ChessGUIController getChessGUIController(InputDevice inputDevice, boolean vsAI) {
         OutputDevice outputDevice = new OutputDevice();
-
         Player p1 = new Player();
         Player p2 = new Player();
 
         ChessController chessController;
         try {
             chessController = new ChessController(p1, p2);
+            chessController.setVsAI(vsAI);
         } catch (InputException ex) {
             throw new RuntimeException(ex);
         }

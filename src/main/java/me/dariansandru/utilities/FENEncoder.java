@@ -21,16 +21,17 @@ public abstract class FENEncoder {
         String currentColour = (currentTurn == PieceColour.WHITE) ? "w" : "b";
         StringBuilder encodingBuilder = new StringBuilder();
 
-        String whiteCastleKingSide = chessRound.canCastleKingSide(PieceColour.WHITE) ? "K" : "";
-        String whiteCastleQueenSide = chessRound.canCastleQueenSide(PieceColour.WHITE) ? "Q" : "";
-        String blackCastleKingSide = chessRound.canCastleKingSide(PieceColour.BLACK) ? "k" : "";
-        String blackCastleQueenSide = chessRound.canCastleQueenSide(PieceColour.BLACK) ? "q" : "";
+        String whiteCastleKingSide = chessRound.hasKingSideCastlePrivilege(PieceColour.WHITE) ? "K" : "";
+        String whiteCastleQueenSide = chessRound.hasQueenSideCastlePrivilege(PieceColour.WHITE) ? "Q" : "";
+        String blackCastleKingSide = chessRound.hasKingSideCastlePrivilege(PieceColour.BLACK) ? "k" : "";
+        String blackCastleQueenSide = chessRound.hasQueenSideCastlePrivilege(PieceColour.BLACK) ? "q" : "";
 
-        for (int row = 0 ; row < 8 ; row++) {
+        for (int row = 7 ; row >= 0 ; row--) {
             int emptyPieces = 0;
             for (int col = 0 ; col < 8 ; col++) {
-                String piece = pieces[row][col].getRepresentation();
-                if (piece.equals("X")) emptyPieces++;
+                String piece = (pieces[row][col].getColour() == PieceColour.WHITE) ?
+                        pieces[row][col].getRepresentation() : pieces[row][col].getRepresentation().toLowerCase();
+                if (piece.equals("x")) emptyPieces++;
                 else {
                     if (emptyPieces != 0) encodingBuilder.append(emptyPieces);
                     emptyPieces = 0;
@@ -39,7 +40,7 @@ public abstract class FENEncoder {
             }
 
             if (emptyPieces != 0) encodingBuilder.append(emptyPieces);
-            encodingBuilder.append("/");
+            if (row != 0) encodingBuilder.append("/");
         }
 
         encodingBuilder.append(" ").append(currentColour).append(" ");

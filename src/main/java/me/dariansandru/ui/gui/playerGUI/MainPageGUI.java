@@ -10,15 +10,13 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class MainPageGUI extends JFrame {
-
     private JFrame frame;
-
     private JButton loginButton;
     private JButton registerButton;
-    private JButton playButton;
+    private JButton playHumanButton;
+    private JButton playAIButton;
     private JButton statsButton;
     private JLabel messageLabel;
-
     private final Observer<Player> loggedPlayer = new Observer<>();
     public String loggedPlayerName;
 
@@ -63,18 +61,22 @@ public class MainPageGUI extends JFrame {
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        playHumanButton = new JButton("Play vs Human");
+        playAIButton = new JButton("Play vs AI");
+        statsButton = new JButton("Stats");
         loginButton = new JButton("Login");
         registerButton = new JButton("Register");
-        playButton = new JButton("Play");
-        statsButton = new JButton("Stats");
 
+        playHumanButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        playAIButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        statsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         loginButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         registerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        statsButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        buttonPanel.add(playButton);
+        buttonPanel.add(playHumanButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        buttonPanel.add(playAIButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
         buttonPanel.add(statsButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
@@ -83,7 +85,6 @@ public class MainPageGUI extends JFrame {
         buttonPanel.add(registerButton);
 
         frame.add(buttonPanel, BorderLayout.SOUTH);
-
         frame.setVisible(true);
     }
 
@@ -95,8 +96,12 @@ public class MainPageGUI extends JFrame {
         registerButton.addActionListener(action);
     }
 
-    public void setPlayButtonAction(ActionListener action) {
-        playButton.addActionListener(action);
+    public void setPlayHumanButtonAction(ActionListener action) {
+        playHumanButton.addActionListener(action);
+    }
+
+    public void setPlayAIButtonAction(ActionListener action) {
+        playAIButton.addActionListener(action);
     }
 
     public void setStatsButtonAction(ActionListener action) {
