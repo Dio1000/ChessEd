@@ -93,6 +93,7 @@ After building, the ChessEd.jar file will be available in the ```target/``` dire
    java -jar ChessEd.jar gui
 
 2. **With AI (Human Vs AI)**
+   
    First, start by launching the engine
    ```bash
    python ChessEngine/engine_server.py
