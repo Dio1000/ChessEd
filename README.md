@@ -19,7 +19,23 @@ ChessEd is a Java application with a Swing graphical interface which implements 
 
 ## How to Use
 
-Soon
+When opening the application in gui mode, the user will be greeted by the following main menu.
+
+<img src="screenshots/chess_main.png" width="300"/>
+
+By clicking "Play vs Human" or "Play vs AI", the user will be navigated to the board. 
+
+<img src="screenshots/board_initial.png" width="500"/>
+
+In order to play a move, users just need to click on the piece they would like to move (which will highlight the piece) and then to the square they would like to move the piece to. When moving a piece, standard chess gameplay rules will be applied. If the move is not legal, the piece will be not be selected anymore.
+
+This is the board after a variation of the Queen's Gambit declined opening.
+
+<img src="screenshots/board_opening.png" width="500"/>
+
+Since this application is not meant for competitive play, the user will be able to reset the game (revert all pieces to their original places) at any point by preessing the "Reset Game" button. 
+
+Users will also have the option to Login and Register in order to be able to track their stats, although that requires some tweaks in the code itself.
 
 ## Prerequisites
 
