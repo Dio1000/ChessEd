@@ -94,10 +94,7 @@ After building, the ChessEd.jar file will be available in the ```target/``` dire
 
 2. **With AI (Human Vs AI)**
    
-   First, start by launching the engine
-   ```bash
-   python ChessEngine/engine_server.py
-   ```
+   First, start by launching the engine using the instructions here [https://github.com/Dio1000/ChessEngine](https://github.com/Dio1000/ChessEngine)  
 
    Then, from the application, click the "Play vs AI" button.
 
